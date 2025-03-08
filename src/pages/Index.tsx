@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import ExerciseForm, { Exercise } from '@/components/ExerciseForm';
@@ -8,6 +7,7 @@ import RestTimer from '@/components/RestTimer';
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -16,6 +16,28 @@ const Index = () => {
   const [currentSet, setCurrentSet] = useState(0);
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [timerType, setTimerType] = useState<'set' | 'exercise'>('set');
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  // Check if user is signed in
+  useEffect(() => {
+    const checkUserSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsSignedIn(!!data.session);
+    };
+
+    checkUserSession();
+
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsSignedIn(!!session);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const addExercise = (exercise: Exercise) => {
     setExercises([...exercises, exercise]);
@@ -107,7 +129,8 @@ const Index = () => {
             
             <ExerciseList 
               exercises={exercises} 
-              onDeleteExercise={deleteExercise} 
+              onDeleteExercise={deleteExercise}
+              isSignedIn={isSignedIn}
             />
             
             {exercises.length > 0 && (
@@ -161,6 +184,7 @@ const Index = () => {
               onDeleteExercise={() => {}} // Disable deletion during workout
               currentExerciseId={currentExercise?.id}
               activeSet={currentSet}
+              isSignedIn={isSignedIn}
             />
             
             <div className="mt-auto pb-6">
