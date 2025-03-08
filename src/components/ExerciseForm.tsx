@@ -1,11 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from '@/integrations/supabase/client';
-import AuthModal from '@/components/AuthModal';
 
 export interface Exercise {
   id: string;
@@ -22,9 +19,8 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ onAddExercise }) => {
   const [name, setName] = useState('');
   const [sets, setSets] = useState(3);
   const [reps, setReps] = useState(10);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -34,23 +30,6 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ onAddExercise }) => {
         variant: "destructive",
       });
       return;
-    }
-    
-    // Check if user is signed in
-    const { data } = await supabase.auth.getSession();
-    const isSignedIn = !!data.session;
-    
-    if (!isSignedIn) {
-      toast({
-        title: "Not signed in",
-        description: "Create an account or sign in to save your exercises",
-        variant: "default",
-        action: (
-          <Button variant="outline" size="sm" onClick={() => setIsAuthModalOpen(true)}>
-            Sign in
-          </Button>
-        ),
-      });
     }
     
     const newExercise: Exercise = {
@@ -168,11 +147,6 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ onAddExercise }) => {
           Add Exercise
         </Button>
       </form>
-      
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
     </div>
   );
 };
