@@ -57,9 +57,18 @@ export const useExerciseData = () => {
   const loadUserExercises = async () => {
     try {
       setLoading(true);
+      // Get the current user's ID
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+      
       const { data, error } = await supabase
         .from('user_exercises')
         .select('*')
+        .eq('user_id', userId)
         .order('created_at', { ascending: true });
       
       if (error) {
@@ -67,6 +76,7 @@ export const useExerciseData = () => {
       }
       
       if (data) {
+        console.log("Loaded exercises:", data);
         const loadedExercises = data.map(item => ({
           id: item.id,
           name: item.name,
@@ -93,6 +103,15 @@ export const useExerciseData = () => {
     if (!isSignedIn) return;
     
     try {
+      console.log("Saving exercise to database:", exercise);
+      // Get the current user's ID
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+      
       const { error } = await supabase
         .from('user_exercises')
         .insert({
@@ -100,10 +119,12 @@ export const useExerciseData = () => {
           name: exercise.name,
           sets: exercise.sets,
           reps: exercise.reps,
-          user_id: (await supabase.auth.getUser()).data.user?.id
+          user_id: userId
         });
       
       if (error) throw error;
+      
+      console.log("Exercise saved successfully");
       
     } catch (error: any) {
       console.error("Error saving exercise:", error);
