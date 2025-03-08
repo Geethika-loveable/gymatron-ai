@@ -4,6 +4,7 @@ import { Exercise } from './ExerciseForm';
 import ExerciseItem from './ExerciseItem';
 import { Button } from '@/components/ui/button';
 import AuthModal from './AuthModal';
+import { Loader2 } from 'lucide-react';
 
 interface ExerciseListProps {
   exercises: Exercise[];
@@ -11,6 +12,7 @@ interface ExerciseListProps {
   currentExerciseId?: string;
   activeSet?: number;
   isSignedIn?: boolean;
+  loading?: boolean;
 }
 
 const ExerciseList: React.FC<ExerciseListProps> = ({ 
@@ -18,9 +20,19 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
   onDeleteExercise, 
   currentExerciseId,
   activeSet,
-  isSignedIn = false
+  isSignedIn = false,
+  loading = false
 }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+        <p className="mt-2 text-muted-foreground">Loading your exercises...</p>
+      </div>
+    );
+  }
 
   if (exercises.length === 0) {
     return (

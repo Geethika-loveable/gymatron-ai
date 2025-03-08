@@ -17,20 +17,33 @@ const Index = () => {
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [timerType, setTimerType] = useState<'set' | 'exercise'>('set');
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Check if user is signed in
+  // Check if user is signed in and load their exercises
   useEffect(() => {
     const checkUserSession = async () => {
       const { data } = await supabase.auth.getSession();
-      setIsSignedIn(!!data.session);
+      const isUserSignedIn = !!data.session;
+      setIsSignedIn(isUserSignedIn);
+      
+      if (isUserSignedIn) {
+        await loadUserExercises();
+      }
     };
 
     checkUserSession();
 
     // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setIsSignedIn(!!session);
+      async (event, session) => {
+        const isUserSignedIn = !!session;
+        setIsSignedIn(isUserSignedIn);
+        
+        if (event === 'SIGNED_IN') {
+          await loadUserExercises();
+        } else if (event === 'SIGNED_OUT') {
+          setExercises([]);
+        }
       }
     );
 
@@ -39,16 +52,106 @@ const Index = () => {
     };
   }, []);
 
-  const addExercise = (exercise: Exercise) => {
+  // Load user exercises from Supabase
+  const loadUserExercises = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('user_exercises')
+        .select('*')
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const loadedExercises = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          sets: item.sets,
+          reps: item.reps
+        }));
+        
+        setExercises(loadedExercises);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error loading exercises",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Save exercise to Supabase
+  const saveExerciseToDatabase = async (exercise: Exercise) => {
+    if (!isSignedIn) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_exercises')
+        .insert({
+          id: exercise.id,
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          name: exercise.name,
+          sets: exercise.sets,
+          reps: exercise.reps
+        });
+      
+      if (error) throw error;
+      
+    } catch (error: any) {
+      toast({
+        title: "Error saving exercise",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Delete exercise from Supabase
+  const deleteExerciseFromDatabase = async (id: string) => {
+    if (!isSignedIn) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_exercises')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+    } catch (error: any) {
+      toast({
+        title: "Error deleting exercise",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addExercise = async (exercise: Exercise) => {
     setExercises([...exercises, exercise]);
+    
+    if (isSignedIn) {
+      await saveExerciseToDatabase(exercise);
+    }
+    
     toast({
       title: "Exercise added",
       description: `Added ${exercise.name} to your workout`,
     });
   };
 
-  const deleteExercise = (id: string) => {
+  const deleteExercise = async (id: string) => {
     setExercises(exercises.filter((exercise) => exercise.id !== id));
+    
+    if (isSignedIn) {
+      await deleteExerciseFromDatabase(id);
+    }
   };
 
   const startWorkout = () => {
@@ -131,6 +234,7 @@ const Index = () => {
               exercises={exercises} 
               onDeleteExercise={deleteExercise}
               isSignedIn={isSignedIn}
+              loading={loading}
             />
             
             {exercises.length > 0 && (
