@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import ExerciseForm, { Exercise } from '@/components/ExerciseForm';
@@ -95,10 +97,10 @@ const Index = () => {
         .from('user_exercises')
         .insert({
           id: exercise.id,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
           name: exercise.name,
           sets: exercise.sets,
-          reps: exercise.reps
+          reps: exercise.reps,
+          user_id: (await supabase.auth.getUser()).data.user?.id
         });
       
       if (error) throw error;
@@ -134,10 +136,16 @@ const Index = () => {
   };
 
   const addExercise = async (exercise: Exercise) => {
-    setExercises([...exercises, exercise]);
+    // Generate a proper UUID for the exercise
+    const exerciseWithUUID = {
+      ...exercise,
+      id: uuidv4()
+    };
+    
+    setExercises([...exercises, exerciseWithUUID]);
     
     if (isSignedIn) {
-      await saveExerciseToDatabase(exercise);
+      await saveExerciseToDatabase(exerciseWithUUID);
     }
     
     toast({

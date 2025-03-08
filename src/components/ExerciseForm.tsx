@@ -33,7 +33,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ onAddExercise }) => {
     }
     
     const newExercise: Exercise = {
-      id: Date.now().toString(),
+      id: '',
       name: name.trim(),
       sets,
       reps
@@ -41,7 +41,6 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ onAddExercise }) => {
     
     onAddExercise(newExercise);
     setName('');
-    // Keep sets and reps at their current values for faster entry of similar exercises
   };
   
   const handleSetChange = (increment: boolean) => {

@@ -64,7 +64,7 @@ const Header: React.FC = () => {
             className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 bg-primary-foreground border border-border"
           >
             <img 
-              src="/gyma-icon.jpg" 
+              src="/lovable-uploads/27fb39a1-3ad1-43f1-9ce5-0b2d7ad619b7.png" 
               alt="Gyma AI" 
               className="w-full h-full object-cover"
             />
