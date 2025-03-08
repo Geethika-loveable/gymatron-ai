@@ -13,12 +13,21 @@ export const useExerciseData = () => {
   // Check if user is signed in and load their exercises
   useEffect(() => {
     const checkUserSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      const isUserSignedIn = !!data.session;
-      setIsSignedIn(isUserSignedIn);
-      
-      if (isUserSignedIn) {
-        await loadUserExercises();
+      setLoading(true);
+      try {
+        const { data } = await supabase.auth.getSession();
+        const isUserSignedIn = !!data.session;
+        setIsSignedIn(isUserSignedIn);
+        
+        if (isUserSignedIn) {
+          await loadUserExercises();
+        } else {
+          // If user is not signed in, make sure loading is set to false
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+        setLoading(false);
       }
     };
 
@@ -31,6 +40,7 @@ export const useExerciseData = () => {
         setIsSignedIn(isUserSignedIn);
         
         if (event === 'SIGNED_IN') {
+          setLoading(true);
           await loadUserExercises();
         } else if (event === 'SIGNED_OUT') {
           setExercises([]);
@@ -67,6 +77,7 @@ export const useExerciseData = () => {
         setExercises(loadedExercises);
       }
     } catch (error: any) {
+      console.error("Error loading exercises:", error);
       toast({
         title: "Error loading exercises",
         description: error.message,
@@ -95,6 +106,7 @@ export const useExerciseData = () => {
       if (error) throw error;
       
     } catch (error: any) {
+      console.error("Error saving exercise:", error);
       toast({
         title: "Error saving exercise",
         description: error.message,
@@ -116,6 +128,7 @@ export const useExerciseData = () => {
       if (error) throw error;
       
     } catch (error: any) {
+      console.error("Error deleting exercise:", error);
       toast({
         title: "Error deleting exercise",
         description: error.message,
@@ -131,7 +144,7 @@ export const useExerciseData = () => {
       id: uuidv4()
     };
     
-    setExercises([...exercises, exerciseWithUUID]);
+    setExercises(prevExercises => [...prevExercises, exerciseWithUUID]);
     
     if (isSignedIn) {
       await saveExerciseToDatabase(exerciseWithUUID);
@@ -144,7 +157,7 @@ export const useExerciseData = () => {
   };
 
   const deleteExercise = async (id: string) => {
-    setExercises(exercises.filter((exercise) => exercise.id !== id));
+    setExercises(prevExercises => prevExercises.filter(exercise => exercise.id !== id));
     
     if (isSignedIn) {
       await deleteExerciseFromDatabase(id);

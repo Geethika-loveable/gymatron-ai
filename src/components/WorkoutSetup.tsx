@@ -39,6 +39,7 @@ const WorkoutSetup: React.FC<WorkoutSetupProps> = ({
           <Button 
             onClick={onStartWorkout} 
             className="w-full h-14 text-lg"
+            disabled={loading}
           >
             <PlayIcon className="mr-2" size={20} />
             Start Now
