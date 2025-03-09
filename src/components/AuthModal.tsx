@@ -35,7 +35,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       
       if (error) throw error;
       
-      // Close modal on successful signin - this will now work correctly
+      toast({
+        title: "Signed in successfully",
+        description: "Welcome back!",
+        variant: "default",
+      });
+      
+      // Close modal on successful signin
       onClose();
       
     } catch (error: any) {

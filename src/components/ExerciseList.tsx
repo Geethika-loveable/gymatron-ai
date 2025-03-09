@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Exercise } from './ExerciseForm';
 import ExerciseItem from './ExerciseItem';
 import { Button } from '@/components/ui/button';
@@ -25,23 +25,50 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
 }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // If user is signed in and loading is in progress, show the loading state
-  if (isSignedIn && loading) {
-    return (
-      <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-        <p className="mt-2 text-muted-foreground">Loading your exercises...</p>
-      </div>
-    );
-  }
+  const renderContent = () => {
+    // Show loading indicator only when user is signed in and data is loading
+    if (isSignedIn && loading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+          <p className="text-muted-foreground">Loading your exercises...</p>
+        </div>
+      );
+    }
 
-  if (exercises.length === 0) {
+    // If there are exercises, display them
+    if (exercises.length > 0) {
+      return (
+        <div className="space-y-3">
+          {exercises.map(exercise => (
+            <ExerciseItem 
+              key={exercise.id} 
+              exercise={exercise} 
+              onDelete={onDeleteExercise}
+              currentExercise={exercise.id === currentExerciseId}
+              activeSet={exercise.id === currentExerciseId ? activeSet : undefined}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    // If signed in but no exercises
+    if (isSignedIn) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          Your exercises will show up here
+        </div>
+      );
+    }
+
+    // Not signed in and no exercises
     return (
-      <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up text-center text-muted-foreground">
-        {isSignedIn ? "Your exercises will show up here" : "No exercises added yet"}
+      <div className="text-center py-8 text-muted-foreground">
+        No exercises added yet
       </div>
     );
-  }
+  };
 
   return (
     <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up">
@@ -62,17 +89,7 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
         )}
       </div>
       
-      <div className="space-y-3">
-        {exercises.map(exercise => (
-          <ExerciseItem 
-            key={exercise.id} 
-            exercise={exercise} 
-            onDelete={onDeleteExercise}
-            currentExercise={exercise.id === currentExerciseId}
-            activeSet={exercise.id === currentExerciseId ? activeSet : undefined}
-          />
-        ))}
-      </div>
+      {renderContent()}
 
       <AuthModal 
         isOpen={isAuthModalOpen} 

@@ -53,16 +53,18 @@ export const useExerciseData = () => {
   // Load user exercises from Supabase
   const loadUserExercises = async () => {
     try {
-      setLoading(true);
+      console.log("Starting to load user exercises...");
       // Get the current user's ID
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
       
       if (!userId) {
+        console.log("No user ID found, stopping load");
         setLoading(false);
-        throw new Error("User not authenticated");
+        return;
       }
       
+      console.log("Fetching exercises for user:", userId);
       const { data, error } = await supabase
         .from('user_exercises')
         .select('*')
@@ -70,6 +72,7 @@ export const useExerciseData = () => {
         .order('created_at', { ascending: true });
       
       if (error) {
+        console.error("Error fetching exercises:", error);
         throw error;
       }
       
@@ -83,6 +86,9 @@ export const useExerciseData = () => {
         }));
         
         setExercises(loadedExercises);
+      } else {
+        console.log("No exercises found for user");
+        setExercises([]);
       }
     } catch (error: any) {
       console.error("Error loading exercises:", error);
@@ -92,6 +98,7 @@ export const useExerciseData = () => {
         variant: "destructive",
       });
     } finally {
+      console.log("Finished loading exercises, setting loading to false");
       setLoading(false);
     }
   };
@@ -188,6 +195,7 @@ export const useExerciseData = () => {
     isSignedIn,
     loading,
     addExercise,
-    deleteExercise
+    deleteExercise,
+    loadUserExercises  // Expose this function to allow manual reloading
   };
 };
