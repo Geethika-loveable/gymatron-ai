@@ -35,7 +35,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       
       if (error) throw error;
       
-      // Close modal on successful signin
+      // Close modal on successful signin - this will now work correctly
       onClose();
       
     } catch (error: any) {

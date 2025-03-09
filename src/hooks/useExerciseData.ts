@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,6 +59,7 @@ export const useExerciseData = () => {
       const userId = userData.user?.id;
       
       if (!userId) {
+        setLoading(false);
         throw new Error("User not authenticated");
       }
       
