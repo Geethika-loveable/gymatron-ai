@@ -1,165 +1,37 @@
 
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '@/integrations/supabase/client';
 import { Exercise } from '@/components/ExerciseForm';
 import { toast } from "@/components/ui/use-toast";
+import { useAuthState } from './useAuthState';
+import { fetchUserExercises, saveExercise, deleteExercise as deleteExerciseFromDb } from '@/services/exerciseService';
 
 export const useExerciseData = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { isSignedIn } = useAuthState();
 
-  // Check if user is signed in and load their exercises
+  // Load exercises when authentication state changes
   useEffect(() => {
-    const checkUserSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        const isUserSignedIn = !!data.session;
-        setIsSignedIn(isUserSignedIn);
-        
-        if (isUserSignedIn) {
-          setLoading(true);
-          await loadUserExercises();
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        setLoading(false);
-      }
-    };
-
-    checkUserSession();
-
-    // Listen for auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        const isUserSignedIn = !!session;
-        setIsSignedIn(isUserSignedIn);
-        
-        if (event === 'SIGNED_IN') {
-          setLoading(true);
-          await loadUserExercises();
-        } else if (event === 'SIGNED_OUT') {
-          setExercises([]);
-        }
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+    if (isSignedIn) {
+      loadUserExercises();
+    } else {
+      setExercises([]);
+    }
+  }, [isSignedIn]);
 
   // Load user exercises from Supabase
   const loadUserExercises = async () => {
+    if (!isSignedIn) return;
+    
+    setLoading(true);
     try {
-      console.log("Starting to load user exercises...");
-      // Get the current user's ID
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      
-      if (!userId) {
-        console.log("No user ID found, stopping load");
-        setLoading(false);
-        return;
-      }
-      
-      console.log("Fetching exercises for user:", userId);
-      const { data, error } = await supabase
-        .from('user_exercises')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: true });
-      
-      if (error) {
-        console.error("Error fetching exercises:", error);
-        throw error;
-      }
-      
-      if (data) {
-        console.log("Loaded exercises:", data);
-        const loadedExercises = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          sets: item.sets,
-          reps: item.reps
-        }));
-        
-        setExercises(loadedExercises);
-      } else {
-        console.log("No exercises found for user");
-        setExercises([]);
-      }
-    } catch (error: any) {
-      console.error("Error loading exercises:", error);
-      toast({
-        title: "Error loading exercises",
-        description: error.message,
-        variant: "destructive",
-      });
+      const loadedExercises = await fetchUserExercises();
+      setExercises(loadedExercises);
+    } catch (error) {
+      console.error("Error in loadUserExercises:", error);
     } finally {
-      console.log("Finished loading exercises, setting loading to false");
       setLoading(false);
-    }
-  };
-
-  // Save exercise to Supabase
-  const saveExerciseToDatabase = async (exercise: Exercise) => {
-    if (!isSignedIn) return;
-    
-    try {
-      console.log("Saving exercise to database:", exercise);
-      // Get the current user's ID
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      
-      if (!userId) {
-        throw new Error("User not authenticated");
-      }
-      
-      const { error } = await supabase
-        .from('user_exercises')
-        .insert({
-          id: exercise.id,
-          name: exercise.name,
-          sets: exercise.sets,
-          reps: exercise.reps,
-          user_id: userId
-        });
-      
-      if (error) throw error;
-      
-      console.log("Exercise saved successfully");
-      
-    } catch (error: any) {
-      console.error("Error saving exercise:", error);
-      toast({
-        title: "Error saving exercise",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Delete exercise from Supabase
-  const deleteExerciseFromDatabase = async (id: string) => {
-    if (!isSignedIn) return;
-    
-    try {
-      const { error } = await supabase
-        .from('user_exercises')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-    } catch (error: any) {
-      console.error("Error deleting exercise:", error);
-      toast({
-        title: "Error deleting exercise",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
@@ -173,7 +45,7 @@ export const useExerciseData = () => {
     setExercises(prevExercises => [...prevExercises, exerciseWithUUID]);
     
     if (isSignedIn) {
-      await saveExerciseToDatabase(exerciseWithUUID);
+      await saveExercise(exerciseWithUUID);
     }
     
     toast({
@@ -186,7 +58,7 @@ export const useExerciseData = () => {
     setExercises(prevExercises => prevExercises.filter(exercise => exercise.id !== id));
     
     if (isSignedIn) {
-      await deleteExerciseFromDatabase(id);
+      await deleteExerciseFromDb(id);
     }
   };
 
@@ -196,6 +68,6 @@ export const useExerciseData = () => {
     loading,
     addExercise,
     deleteExercise,
-    loadUserExercises  // Expose this function to allow manual reloading
+    loadUserExercises
   };
 };
