@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,17 +12,14 @@ export const useExerciseData = () => {
   // Check if user is signed in and load their exercises
   useEffect(() => {
     const checkUserSession = async () => {
-      setLoading(true);
       try {
         const { data } = await supabase.auth.getSession();
         const isUserSignedIn = !!data.session;
         setIsSignedIn(isUserSignedIn);
         
         if (isUserSignedIn) {
+          setLoading(true);
           await loadUserExercises();
-        } else {
-          // If user is not signed in, make sure loading is set to false
-          setLoading(false);
         }
       } catch (error) {
         console.error("Error checking session:", error);

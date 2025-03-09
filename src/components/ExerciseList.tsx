@@ -25,7 +25,8 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
 }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  if (loading) {
+  // If user is signed in and loading is in progress, show the loading state
+  if (isSignedIn && loading) {
     return (
       <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
@@ -37,7 +38,7 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
   if (exercises.length === 0) {
     return (
       <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up text-center text-muted-foreground">
-        No exercises added yet
+        {isSignedIn ? "Your exercises will show up here" : "No exercises added yet"}
       </div>
     );
   }
