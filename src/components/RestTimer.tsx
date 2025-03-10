@@ -29,7 +29,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
       clearInterval(timerRef.current);
     }
     
-    timerRef.current = window.setInterval(() => {
+    const interval = window.setInterval(() => {
       const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const remaining = Math.max(0, duration - elapsedSeconds);
       
@@ -38,18 +38,18 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
       
       if (remaining <= 0 && !completedRef.current) {
         completedRef.current = true;
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
+        clearInterval(interval);
         playBellSound();
         onComplete();
       }
     }, 100);
+    
+    timerRef.current = interval;
 
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
   }, [duration, onComplete]);
