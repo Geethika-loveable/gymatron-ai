@@ -13,50 +13,79 @@ interface RestTimerProps {
 const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) => {
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
-  const animationFrameRef = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const endTimeRef = useRef<number>(0);
+  
+  // For debugging
+  const [debug, setDebug] = useState({ start: 0, current: 0, elapsed: 0 });
 
+  // Effect to initialize and start the timer
   useEffect(() => {
-    // Reset the timer when the component mounts or when duration changes
+    console.log(`Timer starting with duration: ${duration} seconds`);
+    
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
+    // Initialize timer state
+    const now = Date.now();
+    startTimeRef.current = now;
+    endTimeRef.current = now + (duration * 1000);
     setTimeLeft(duration);
     setProgress(100);
-    startTimeRef.current = Date.now();
-
-    // Update function for the timer
-    const updateTimer = () => {
-      const elapsedMs = Date.now() - startTimeRef.current;
+    
+    // Set up interval that ticks every 100ms for smoother updates
+    intervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, endTimeRef.current - now);
+      const elapsedMs = now - startTimeRef.current;
       const elapsedSeconds = elapsedMs / 1000;
-      const newTimeLeft = Math.max(0, duration - Math.floor(elapsedSeconds));
-      const newProgress = (newTimeLeft / duration) * 100;
+      const remainingSeconds = Math.ceil(remaining / 1000); // Use ceil to avoid jumping to 0 too early
+      const progressValue = (remainingSeconds / duration) * 100;
       
-      setTimeLeft(newTimeLeft);
-      setProgress(newProgress);
+      // Update debug info
+      setDebug({
+        start: startTimeRef.current,
+        current: now,
+        elapsed: elapsedSeconds
+      });
       
-      if (newTimeLeft <= 0) {
-        // Timer is complete
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = null;
+      console.log(`Timer update: ${remainingSeconds}s left, progress: ${progressValue}%`);
+      
+      // Update the UI
+      setTimeLeft(remainingSeconds);
+      setProgress(progressValue);
+      
+      // Check if timer is complete
+      if (remaining <= 0) {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
         }
         playBellSound();
         onComplete();
-      } else {
-        // Continue the timer
-        animationFrameRef.current = requestAnimationFrame(updateTimer);
       }
-    };
+    }, 100);
     
-    // Start the timer
-    animationFrameRef.current = requestAnimationFrame(updateTimer);
-    
-    // Cleanup on unmount or when duration changes
+    // Cleanup function
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
+      console.log('Timer cleanup');
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [duration, onComplete]);
+  }, [duration, onComplete]); // Re-run effect if duration or onComplete changes
+  
+  // For debugging purposes - this will be visible in the DOM
+  const debugInfo = (
+    <div className="hidden">
+      start: {debug.start}, current: {debug.current}, elapsed: {debug.elapsed.toFixed(1)}s
+    </div>
+  );
 
   return (
     <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-fade-in">
@@ -69,6 +98,8 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
       </div>
       
       <Progress value={progress} className="h-2 bg-gray-200" />
+      
+      {debugInfo}
     </div>
   );
 };
