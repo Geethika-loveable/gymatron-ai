@@ -11,6 +11,7 @@ interface WorkoutActionsProps {
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
   setTimerType: (value: 'set' | 'exercise') => void;
+  onWorkoutEnd?: () => void;
 }
 
 export const useWorkoutActions = ({
@@ -20,7 +21,8 @@ export const useWorkoutActions = ({
   setCurrentExerciseIndex, 
   setCurrentSet,
   setShowRestTimer,
-  setTimerType
+  setTimerType,
+  onWorkoutEnd
 }: WorkoutActionsProps) => {
   const startWorkout = () => {
     if (exercises.length === 0) {
@@ -63,6 +65,9 @@ export const useWorkoutActions = ({
         } else {
           // Workout complete
           setIsWorkoutStarted(false);
+          if (onWorkoutEnd) {
+            onWorkoutEnd();
+          }
           toast({
             title: "Workout completed",
             description: "Great job! You've completed your workout.",

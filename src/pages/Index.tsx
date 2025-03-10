@@ -6,12 +6,13 @@ import WorkoutSetup from '@/components/WorkoutSetup';
 import ActiveWorkout from '@/components/ActiveWorkout';
 import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const { 
     exercises, 
     isSignedIn, 
-    loading, 
+    loading: exercisesLoading, 
     addExercise, 
     deleteExercise 
   } = useExerciseData();
@@ -22,39 +23,58 @@ const Index = () => {
     showRestTimer,
     timerType,
     currentExercise,
+    isLoading: persistenceLoading,
+    stopwatchTime,
     startWorkout,
     handleRestTimerComplete,
     resetWorkout,
-    completeSet
+    completeSet,
+    updateStopwatchTime
   } = useWorkout(exercises);
+
+  const loading = exercisesLoading || persistenceLoading;
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 flex flex-col">
       <Header />
       
       <div className="container mx-auto flex-1 flex flex-col max-w-md">
-        <Stopwatch isWorkoutStarted={isWorkoutStarted} />
-        
-        {!isWorkoutStarted ? (
-          <WorkoutSetup 
-            exercises={exercises}
-            onAddExercise={addExercise}
-            onDeleteExercise={deleteExercise}
-            onStartWorkout={startWorkout}
-            isSignedIn={isSignedIn}
-            loading={loading}
-          />
+        {loading ? (
+          // Loading state
+          <>
+            <Skeleton className="h-[152px] w-full mb-6 rounded-lg" />
+            <Skeleton className="h-[300px] w-full mb-6 rounded-lg" />
+          </>
         ) : (
-          <ActiveWorkout 
-            exercises={exercises}
-            showRestTimer={showRestTimer}
-            timerType={timerType}
-            currentExercise={currentExercise}
-            currentSet={currentSet}
-            onRestTimerComplete={handleRestTimerComplete}
-            onCompleteSet={completeSet}
-            onEndWorkout={resetWorkout}
-          />
+          <>
+            <Stopwatch 
+              isWorkoutStarted={isWorkoutStarted} 
+              onTimeUpdate={updateStopwatchTime}
+              initialTime={stopwatchTime}
+            />
+            
+            {!isWorkoutStarted ? (
+              <WorkoutSetup 
+                exercises={exercises}
+                onAddExercise={addExercise}
+                onDeleteExercise={deleteExercise}
+                onStartWorkout={startWorkout}
+                isSignedIn={isSignedIn}
+                loading={exercisesLoading}
+              />
+            ) : (
+              <ActiveWorkout 
+                exercises={exercises}
+                showRestTimer={showRestTimer}
+                timerType={timerType}
+                currentExercise={currentExercise}
+                currentSet={currentSet}
+                onRestTimerComplete={handleRestTimerComplete}
+                onCompleteSet={completeSet}
+                onEndWorkout={resetWorkout}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

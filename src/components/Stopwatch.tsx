@@ -6,10 +6,16 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface StopwatchProps {
   isWorkoutStarted: boolean;
+  onTimeUpdate?: (time: number) => void;
+  initialTime?: number;
 }
 
-const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
-  const [time, setTime] = useState<number>(0);
+const Stopwatch: React.FC<StopwatchProps> = ({ 
+  isWorkoutStarted, 
+  onTimeUpdate,
+  initialTime = 0
+}) => {
+  const [time, setTime] = useState<number>(initialTime);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
 
@@ -20,12 +26,20 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
     }
   }, [isWorkoutStarted]);
 
+  // Report time updates to parent
+  useEffect(() => {
+    if (onTimeUpdate) {
+      onTimeUpdate(time);
+    }
+  }, [time, onTimeUpdate]);
+
   const startTimer = () => {
     setIsRunning(true);
     const startTime = Date.now() - time;
     
     intervalRef.current = window.setInterval(() => {
-      setTime(Date.now() - startTime);
+      const currentTime = Date.now() - startTime;
+      setTime(currentTime);
     }, 10);
   };
 

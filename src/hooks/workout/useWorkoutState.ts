@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
 
 export interface WorkoutState {
