@@ -26,6 +26,9 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   onCompleteSet,
   onEndWorkout
 }) => {
+  // Generate a unique key for the timer based on its type and current exercise/set
+  const timerKey = `${timerType}-${currentExercise?.id || 'none'}-set-${currentSet}`;
+  
   return (
     <>
       {showRestTimer ? (
@@ -33,6 +36,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
           duration={timerType === 'set' ? 30 : 60} 
           onComplete={onRestTimerComplete} 
           label={timerType === 'set' ? 'Rest Between Sets' : 'Rest Between Exercises'} 
+          timerKey={timerKey}
         />
       ) : (
         <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-fade-in flex items-center justify-center">
@@ -78,4 +82,4 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   );
 };
 
-export default ActiveWorkout;
+export default React.memo(ActiveWorkout);

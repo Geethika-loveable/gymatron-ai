@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
 import { useLocalWorkoutPersistence } from './useLocalWorkoutPersistence';
 
@@ -17,6 +16,16 @@ export interface WorkoutStateWithTime extends WorkoutState {
 }
 
 export const useWorkoutState = (exercises: Exercise[]) => {
+  const stateRef = useRef({
+    isWorkoutStarted: false,
+    currentExerciseIndex: 0,
+    currentSet: 0,
+    showRestTimer: false,
+    timerType: 'set' as const,
+    workoutStartTime: 0,
+    stopwatchTime: 0,
+  });
+  
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(0);
@@ -27,6 +36,10 @@ export const useWorkoutState = (exercises: Exercise[]) => {
   const [isRestoringState, setIsRestoringState] = useState(true);
   const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
   
+  // Throttle save operations
+  const lastSaveTimeRef = useRef<number>(0);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const { 
     saveWorkoutState, 
     loadWorkoutState, 
@@ -34,24 +47,71 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     isInitialized 
   } = useLocalWorkoutPersistence();
 
-  // Save state whenever key workout values change
+  // Update stateRef when state changes
+  useEffect(() => {
+    stateRef.current = {
+      isWorkoutStarted,
+      currentExerciseIndex,
+      currentSet,
+      showRestTimer,
+      timerType,
+      workoutStartTime,
+      stopwatchTime,
+    };
+  }, [
+    isWorkoutStarted,
+    currentExerciseIndex,
+    currentSet,
+    showRestTimer,
+    timerType,
+    workoutStartTime,
+    stopwatchTime,
+  ]);
+
+  // Throttled save function
+  const throttledSave = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastSave = now - lastSaveTimeRef.current;
+    
+    // Clear any pending save
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
+    // If it's been less than 2 seconds since the last save, schedule a save
+    if (timeSinceLastSave < 2000) {
+      saveTimeoutRef.current = setTimeout(() => {
+        saveState();
+        saveTimeoutRef.current = null;
+      }, 2000 - timeSinceLastSave);
+      return;
+    }
+    
+    // Otherwise save immediately
+    saveState();
+  }, []);
+  
+  // Actual save function
+  const saveState = useCallback(() => {
+    if (!isInitialized || isRestoringState || !stateRef.current.isWorkoutStarted) return;
+    
+    const stateToSave = {
+      ...stateRef.current,
+      exercises: exercises.length > 0 ? exercises : savedExercises,
+      lastSavedAt: Date.now()
+    };
+    
+    saveWorkoutState(stateToSave);
+    lastSaveTimeRef.current = Date.now();
+  }, [isInitialized, isRestoringState, exercises, savedExercises, saveWorkoutState]);
+
+  // Save state when key workout values change
   useEffect(() => {
     if (!isInitialized || isRestoringState) return;
     
     if (isWorkoutStarted) {
-      const stateToSave = {
-        isWorkoutStarted,
-        currentExerciseIndex,
-        currentSet,
-        showRestTimer,
-        timerType,
-        exercises: exercises.length > 0 ? exercises : savedExercises,
-        workoutStartTime,
-        stopwatchTime,
-        lastSavedAt: Date.now()
-      };
-      
-      saveWorkoutState(stateToSave);
+      throttledSave();
     }
   }, [
     isInitialized,
@@ -59,12 +119,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     isWorkoutStarted, 
     currentExerciseIndex, 
     currentSet, 
-    showRestTimer, 
-    exercises, 
-    savedExercises,
-    workoutStartTime,
-    stopwatchTime,
-    saveWorkoutState
+    showRestTimer,
+    throttledSave
   ]);
 
   // Periodic save for stopwatch time during workout
@@ -72,19 +128,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     if (!isWorkoutStarted || !isInitialized || isRestoringState) return;
     
     const saveInterval = setInterval(() => {
-      const stateToSave = {
-        isWorkoutStarted,
-        currentExerciseIndex,
-        currentSet,
-        showRestTimer,
-        timerType,
-        exercises: exercises.length > 0 ? exercises : savedExercises,
-        workoutStartTime,
-        stopwatchTime,
-        lastSavedAt: Date.now()
-      };
-      
-      saveWorkoutState(stateToSave);
+      saveState();
     }, 10000); // Save every 10 seconds
     
     return () => clearInterval(saveInterval);
@@ -92,15 +136,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     isInitialized,
     isRestoringState,
     isWorkoutStarted,
-    currentExerciseIndex,
-    currentSet,
-    showRestTimer,
-    timerType,
-    exercises,
-    savedExercises,
-    workoutStartTime,
-    stopwatchTime,
-    saveWorkoutState
+    saveState
   ]);
 
   // Try to restore state on initial load
@@ -134,17 +170,17 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     }
   }, [isInitialized, loadWorkoutState]);
 
-  const updateStopwatchTime = (time: number) => {
+  const updateStopwatchTime = useCallback((time: number) => {
     setStopwatchTime(time);
-  };
+  }, []);
 
-  const startNewWorkout = () => {
+  const startNewWorkout = useCallback(() => {
     setWorkoutStartTime(Date.now());
     setStopwatchTime(0);
     setIsWorkoutStarted(true);
-  };
+  }, []);
 
-  const resetWorkoutState = () => {
+  const resetWorkoutState = useCallback(() => {
     setIsWorkoutStarted(false);
     setCurrentExerciseIndex(0);
     setCurrentSet(0);
@@ -154,7 +190,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     setStopwatchTime(0);
     setSavedExercises([]);
     clearWorkoutState();
-  };
+  }, [clearWorkoutState]);
 
   return {
     // State

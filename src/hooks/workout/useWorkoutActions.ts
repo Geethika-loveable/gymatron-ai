@@ -2,6 +2,7 @@
 import { toast } from "@/components/ui/use-toast";
 import { Exercise } from '@/components/ExerciseForm';
 import { WorkoutState } from './useWorkoutState';
+import { TimerManager } from '@/utils/TimerManager';
 
 interface WorkoutActionsProps {
   exercises: Exercise[];
@@ -47,6 +48,12 @@ export const useWorkoutActions = ({
   };
 
   const handleRestTimerComplete = () => {
+    console.log("Rest timer complete handler called");
+    
+    // Stop any active timers
+    const timerKey = `${state.timerType}-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
+    TimerManager.stopTimer(timerKey);
+    
     setShowRestTimer(false);
     
     if (state.timerType === 'set') {
@@ -78,8 +85,12 @@ export const useWorkoutActions = ({
     }
   };
 
-  // New method to end workout without resetting the stopwatch
+  // Method to end workout without resetting the stopwatch
   const endWorkout = () => {
+    // Stop all running timers
+    const timerKey = `${state.timerType}-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
+    TimerManager.stopTimer(timerKey);
+    
     setIsWorkoutStarted(false);
     setCurrentExerciseIndex(0);
     setCurrentSet(0);

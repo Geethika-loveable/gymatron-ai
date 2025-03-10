@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import WorkoutSetup from '@/components/WorkoutSetup';
@@ -31,9 +31,38 @@ const Index = () => {
     updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,
-    endWorkout, // Use endWorkout instead of resetWorkout
+    endWorkout,
     completeSet
   } = useWorkout(exercises);
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleAddExercise = useCallback((...args: Parameters<typeof addExercise>) => {
+    addExercise(...args);
+  }, [addExercise]);
+  
+  const handleDeleteExercise = useCallback((...args: Parameters<typeof deleteExercise>) => {
+    deleteExercise(...args);
+  }, [deleteExercise]);
+  
+  const handleStartWorkout = useCallback(() => {
+    startWorkout();
+  }, [startWorkout]);
+  
+  const handleRestComplete = useCallback(() => {
+    handleRestTimerComplete();
+  }, [handleRestTimerComplete]);
+  
+  const handleCompleteSet = useCallback(() => {
+    completeSet();
+  }, [completeSet]);
+  
+  const handleEndWorkout = useCallback(() => {
+    endWorkout();
+  }, [endWorkout]);
+  
+  const handleTimeUpdate = useCallback((time: number) => {
+    updateStopwatchTime(time);
+  }, [updateStopwatchTime]);
 
   // Restore saved exercises if needed
   useEffect(() => {
@@ -61,16 +90,16 @@ const Index = () => {
         <Stopwatch 
           isWorkoutStarted={isWorkoutStarted} 
           initialTime={stopwatchTime}
-          onTimeUpdate={updateStopwatchTime}
+          onTimeUpdate={handleTimeUpdate}
           isRestoringState={isRestoringState}
         />
         
         {!isWorkoutStarted ? (
           <WorkoutSetup 
             exercises={exercises}
-            onAddExercise={addExercise}
-            onDeleteExercise={deleteExercise}
-            onStartWorkout={startWorkout}
+            onAddExercise={handleAddExercise}
+            onDeleteExercise={handleDeleteExercise}
+            onStartWorkout={handleStartWorkout}
             isSignedIn={isSignedIn}
             loading={loading || isRestoringState}
           />
@@ -81,9 +110,9 @@ const Index = () => {
             timerType={timerType}
             currentExercise={currentExercise}
             currentSet={currentSet}
-            onRestTimerComplete={handleRestTimerComplete}
-            onCompleteSet={completeSet}
-            onEndWorkout={endWorkout} // Use endWorkout instead of resetWorkout
+            onRestTimerComplete={handleRestComplete}
+            onCompleteSet={handleCompleteSet}
+            onEndWorkout={handleEndWorkout}
           />
         )}
       </div>

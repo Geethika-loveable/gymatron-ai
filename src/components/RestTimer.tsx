@@ -1,89 +1,91 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId } from 'react';
 import { formatRestTime } from '../utils/timerUtils';
 import { playBellSound } from '../utils/soundUtils';
 import { Progress } from "@/components/ui/progress";
+import { TimerManager } from '../utils/TimerManager';
 
 interface RestTimerProps {
   duration: number; // in seconds
   onComplete: () => void;
   label: string;
+  // Add a key prop to ensure proper component mounting/unmounting
+  timerKey?: string;
 }
 
-const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) => {
+const RestTimer: React.FC<RestTimerProps> = ({ 
+  duration, 
+  onComplete, 
+  label,
+  timerKey 
+}) => {
+  // Generate a stable ID for this timer instance
+  const id = useId();
+  const timerId = useRef(`rest-timer-${timerKey || id}`);
+  
+  // State variables for UI updates only
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(0);
-  const endTimeRef = useRef<number>(0);
   
-  // For debugging
-  const [debug, setDebug] = useState({ start: 0, current: 0, elapsed: 0 });
-
-  // Effect to initialize and start the timer
+  // Flag to track if timer was started
+  const timerStartedRef = useRef(false);
+  
+  // Debug state
+  const [debugInfo, setDebugInfo] = useState({
+    timerId: timerId.current,
+    startedAt: new Date().toISOString(),
+    renderCount: 0
+  });
+  
+  // Increment render count on each render
   useEffect(() => {
-    console.log(`Timer starting with duration: ${duration} seconds`);
+    setDebugInfo(prev => ({
+      ...prev,
+      renderCount: prev.renderCount + 1
+    }));
+  });
+  
+  // Handle timer setup and cleanup
+  useEffect(() => {
+    console.log(`RestTimer: Component mounted with duration ${duration}s, timerId: ${timerId.current}`);
     
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    
-    // Initialize timer state
-    const now = Date.now();
-    startTimeRef.current = now;
-    endTimeRef.current = now + (duration * 1000);
-    setTimeLeft(duration);
-    setProgress(100);
-    
-    // Set up interval that ticks every 100ms for smoother updates
-    intervalRef.current = setInterval(() => {
-      const now = Date.now();
-      const remaining = Math.max(0, endTimeRef.current - now);
-      const elapsedMs = now - startTimeRef.current;
-      const elapsedSeconds = elapsedMs / 1000;
-      const remainingSeconds = Math.ceil(remaining / 1000); // Use ceil to avoid jumping to 0 too early
-      const progressValue = (remainingSeconds / duration) * 100;
+    // Start the timer if not already running
+    if (!timerStartedRef.current) {
+      console.log(`RestTimer: Starting timer ${timerId.current}`);
+      timerStartedRef.current = true;
       
-      // Update debug info
-      setDebug({
-        start: startTimeRef.current,
-        current: now,
-        elapsed: elapsedSeconds
-      });
-      
-      console.log(`Timer update: ${remainingSeconds}s left, progress: ${progressValue}%`);
-      
-      // Update the UI
-      setTimeLeft(remainingSeconds);
-      setProgress(progressValue);
-      
-      // Check if timer is complete
-      if (remaining <= 0) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
+      // Start timer with TimerManager
+      TimerManager.startTimer(
+        timerId.current,
+        duration,
+        // onTick callback - updates UI
+        (remainingTime, progressValue) => {
+          setTimeLeft(remainingTime);
+          setProgress(progressValue);
+        },
+        // onComplete callback
+        () => {
+          console.log(`RestTimer: Timer completed, playing sound and calling onComplete`);
+          playBellSound();
+          onComplete();
         }
-        playBellSound();
-        onComplete();
-      }
-    }, 100);
+      );
+    }
     
     // Cleanup function
     return () => {
-      console.log('Timer cleanup');
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      console.log(`RestTimer: Component unmounting, timerId: ${timerId.current}`);
+      // We don't stop the timer here because we want it to persist through re-renders
+      // It will be cleaned up if a new timer with the same ID is started
     };
-  }, [duration, onComplete]); // Re-run effect if duration or onComplete changes
+  }, [duration, onComplete]);
   
-  // For debugging purposes - this will be visible in the DOM
-  const debugInfo = (
-    <div className="hidden">
-      start: {debug.start}, current: {debug.current}, elapsed: {debug.elapsed.toFixed(1)}s
+  // Force debug display for monitoring
+  const debugDisplay = (
+    <div className="text-xs text-gray-400 mt-2 text-center">
+      <div>Timer ID: {debugInfo.timerId}</div>
+      <div>Started: {debugInfo.startedAt}</div>
+      <div>Render count: {debugInfo.renderCount}</div>
     </div>
   );
 
@@ -99,9 +101,9 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
       
       <Progress value={progress} className="h-2 bg-gray-200" />
       
-      {debugInfo}
+      {process.env.NODE_ENV !== 'production' && debugDisplay}
     </div>
   );
 };
 
-export default RestTimer;
+export default React.memo(RestTimer);
