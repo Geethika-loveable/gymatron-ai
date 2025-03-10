@@ -67,7 +67,7 @@ export const useWorkoutActions = ({
           setShowRestTimer(true);
         } else {
           // Workout complete
-          resetWorkoutState(); // Now handles clearing local storage
+          endWorkout(); // Changed to use endWorkout instead of resetWorkoutState
           
           toast({
             title: "Workout completed",
@@ -78,6 +78,25 @@ export const useWorkoutActions = ({
     }
   };
 
+  // New method to end workout without resetting the stopwatch
+  const endWorkout = () => {
+    setIsWorkoutStarted(false);
+    setCurrentExerciseIndex(0);
+    setCurrentSet(0);
+    setShowRestTimer(false);
+    setTimerType('set');
+    // Note: We're not resetting workoutStartTime or stopwatchTime here
+    
+    // Clear the localStorage state
+    clearWorkoutState();
+  };
+
+  // Import the clearWorkoutState function directly to avoid circular imports
+  const clearWorkoutState = () => {
+    localStorage.removeItem('workout_state_v1');
+    console.log('Workout state cleared from localStorage');
+  };
+
   const completeSet = () => {
     setTimerType('set');
     setShowRestTimer(true);
@@ -86,7 +105,8 @@ export const useWorkoutActions = ({
   return {
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout: resetWorkoutState,
-    completeSet
+    resetWorkout: resetWorkoutState, // This will be replaced in useWorkout
+    completeSet,
+    endWorkout // Export the new method
   };
 };

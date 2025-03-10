@@ -31,7 +31,7 @@ const Index = () => {
     updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout,
+    endWorkout, // Use endWorkout instead of resetWorkout
     completeSet
   } = useWorkout(exercises);
 
@@ -83,7 +83,7 @@ const Index = () => {
             currentSet={currentSet}
             onRestTimerComplete={handleRestTimerComplete}
             onCompleteSet={completeSet}
-            onEndWorkout={resetWorkout}
+            onEndWorkout={endWorkout} // Use endWorkout instead of resetWorkout
           />
         )}
       </div>

@@ -27,7 +27,7 @@ export const useWorkout = (exercises: Exercise[]) => {
   const {
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout,
+    endWorkout, // Use the new method
     completeSet
   } = useWorkoutActions({
     exercises: exercises.length > 0 ? exercises : savedExercises,
@@ -46,6 +46,11 @@ export const useWorkout = (exercises: Exercise[]) => {
     setTimerType,
     resetWorkoutState
   });
+
+  // Define a proper resetWorkout function that resets everything including the stopwatch
+  const resetWorkout = () => {
+    resetWorkoutState(); // This will reset all state including stopwatch time
+  };
 
   const effectiveExercises = exercises.length > 0 ? exercises : savedExercises;
   const currentExercise = isWorkoutStarted && effectiveExercises.length > 0 
@@ -66,7 +71,8 @@ export const useWorkout = (exercises: Exercise[]) => {
     updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout,
+    resetWorkout,       // For complete reset including stopwatch
+    endWorkout,         // New function to end workout without resetting stopwatch
     completeSet
   };
 };

@@ -22,6 +22,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   const intervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const isInitializedRef = useRef<boolean>(false);
+  const previousIsWorkoutStartedRef = useRef<boolean>(false);
 
   // Initialize or restore timer
   useEffect(() => {
@@ -35,6 +36,25 @@ const Stopwatch: React.FC<StopwatchProps> = ({
     
     isInitializedRef.current = true;
   }, [initialTime, isWorkoutStarted, isRestoringState]);
+
+  // Track workout started changes
+  useEffect(() => {
+    // If workout is newly started (transitioning from false to true)
+    if (isWorkoutStarted && !previousIsWorkoutStartedRef.current) {
+      // Reset the timer and start it from 0
+      resetTimer();
+      startTimeRef.current = Date.now();
+      startTimer();
+    } 
+    // If workout has ended (transitioning from true to false)
+    else if (!isWorkoutStarted && previousIsWorkoutStartedRef.current) {
+      // Stop the timer but don't reset it
+      pauseTimer();
+    }
+
+    // Update reference for next check
+    previousIsWorkoutStartedRef.current = isWorkoutStarted;
+  }, [isWorkoutStarted]);
 
   // Auto-start when workout begins or when restored
   useEffect(() => {
