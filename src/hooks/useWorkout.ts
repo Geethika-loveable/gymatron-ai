@@ -27,7 +27,7 @@ export const useWorkout = (exercises: Exercise[]) => {
   const {
     startWorkout,
     handleRestTimerComplete,
-    endWorkout, // Use the new method
+    endWorkout,
     completeSet
   } = useWorkoutActions({
     exercises: exercises.length > 0 ? exercises : savedExercises,
@@ -36,7 +36,12 @@ export const useWorkout = (exercises: Exercise[]) => {
       currentExerciseIndex,
       currentSet,
       showRestTimer,
-      timerType
+      timerType,
+      isWorkoutCompleted: false,
+      workoutStartTime,
+      stopwatchTime,
+      isRestoringState,
+      savedExercises
     },
     startNewWorkout,
     setIsWorkoutStarted,

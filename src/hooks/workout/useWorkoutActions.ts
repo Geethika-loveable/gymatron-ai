@@ -12,7 +12,7 @@ interface WorkoutActionsProps {
   setCurrentExerciseIndex: (value: number) => void;
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
-  setTimerType: (value: 'set' | 'exercise') => void; // Updated type definition
+  setTimerType: (value: 'set' | 'exercise') => void;
   resetWorkoutState: () => void;
 }
 

@@ -67,6 +67,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
         currentExerciseId={currentExercise?.id}
         activeSet={currentSet}
         isSignedIn={true} // This doesn't matter during workout
+        onOpenAuthModal={() => {}} // Add this prop with an empty function since auth is not needed during workout
       />
       
       <div className="mt-auto pb-6">
