@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Exercise } from './ExerciseForm';
 import ExerciseItem from './ExerciseItem';
 import { Button } from '@/components/ui/button';
-import AuthModal from './AuthModal';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExerciseListProps {
   exercises: Exercise[];
@@ -13,6 +13,7 @@ interface ExerciseListProps {
   activeSet?: number;
   isSignedIn?: boolean;
   loading?: boolean;
+  onOpenAuthModal: () => void; // New prop for opening the global auth modal
 }
 
 const ExerciseList: React.FC<ExerciseListProps> = ({ 
@@ -21,9 +22,10 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
   currentExerciseId,
   activeSet,
   isSignedIn = false,
-  loading = false
+  loading = false,
+  onOpenAuthModal
 }) => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const renderContent = () => {
     // Show loading indicator only when user is signed in and data is loading
@@ -82,7 +84,7 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
             variant="outline" 
             size="sm" 
             className="text-xs bg-green-500 hover:bg-green-600 text-white border-0"
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={onOpenAuthModal} // Use the prop to open the global modal
           >
             Sign in to Save
           </Button>
@@ -90,11 +92,6 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
       </div>
       
       {renderContent()}
-
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
     </div>
   );
 };
