@@ -1,69 +1,68 @@
-# Welcome to your Lovable project
+# GYMA AI
+## Save Up to 40% of Your Gym Time
 
-## Project info
+GYMA AI is a smart workout companion designed for busy people who want to maximize their exercise efficiency. By providing structured intervals, timely reminders, and focused workout management, GYMA AI helps you complete your routine faster without sacrificing results.
 
-**URL**: https://lovable.dev/projects/61ebf138-c779-4af4-a47d-2ea2165993ac
+## Time-Saving Benefits
 
-## How can I edit this code?
+- **Workout Efficiency**: Complete a full workout in just 60 minutes instead of 100 minutes
+- **Structured Intervals**: Optimized rest periods keep you on track and prevent excessive breaks
+- **Focused Training**: Timely reminders help you maintain intensity and purpose throughout your workout
+- **Streamlined Transitions**: Smooth movement between exercises eliminates wasted time
 
-There are several ways of editing your application.
+## Core Features
 
-**Use Lovable**
+- **Workout Timer**: Track your entire workout with an integrated stopwatch
+- **Exercise Tracking**: Add multiple exercise types to your workout routine
+- **Set & Rep Management**: Customize sets and reps for each exercise
+- **Rest Intervals**: Automated 30-second rest periods between sets with bell notifications
+- **Exercise Transitions**: 60-second intervals between different exercises with audio alerts
+- **Session Management**: Start, pause, and complete workout sessions
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/61ebf138-c779-4af4-a47d-2ea2165993ac) and start prompting.
+## Coming Soon: AI Features (Premium)
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Voice Recognition**: Hands-free workout experience
+- **Automatic Rep Counting**: System detects and counts your reps automatically
+- **Voice Commands**: Move to the next exercise with simple voice instructions
+- **Smart Progression**: AI-powered workout recommendations based on your performance
 
-**Use your preferred IDE**
+## Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Open GYMA AI on your mobile device
+2. Tap "Create Workout" to build your routine
+3. Add exercises and customize sets/reps
+4. Hit "Start Now" to begin your workout
+5. Follow the guided workout flow with timed intervals
+6. Complete your session in less time than ever before
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Data & Privacy
 
-Follow these steps:
+GYMA AI stores all your workout data locally on your device. We prioritize your privacy:
+- No account required to use basic features
+- No data uploaded to external servers
+- Your workout history stays on your device
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Support
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+For questions, feature requests, or technical support:
+- Email: gyma@azynctra.com
+- Visit: [azynctra.com](https://azynctra.com)
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Legal
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+© 2025 Azynctra. All Rights Reserved.
 
-**Edit a file directly in GitHub**
+GYMA AI is a proprietary software product of Azynctra. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+This software and its contents, including but not limited to text, graphics, logos, and code are protected by copyright laws and international treaties. The GYMA AI name, logo, and brand elements are trademarks of Azynctra.
 
-**Use GitHub Codespaces**
+No part of this software may be reproduced, transmitted, or used in any form or by any means, electronic or mechanical, without prior written permission from Azynctra.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## About 
 
-## What technologies are used for this project?
+Developed by Azynctra  
+Founder & CEO: Geethika Isuru
 
-This project is built with .
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/61ebf138-c779-4af4-a47d-2ea2165993ac) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+*GYMA AI - Train Harder, Finish Faster*

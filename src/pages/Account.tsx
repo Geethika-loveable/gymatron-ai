@@ -125,7 +125,7 @@ const Account = () => {
               className="flex items-center hover:opacity-80 transition-opacity"
             >
               <img 
-                src="/lovable-uploads/b54d0993-7f8d-4e0a-9933-0c5417da5639.png"
+                src="/uploads/azynctra.png"
                 alt="Azynctra" 
                 className="h-6" 
               />

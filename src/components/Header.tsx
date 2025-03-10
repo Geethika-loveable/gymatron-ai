@@ -64,12 +64,12 @@ const Header: React.FC = () => {
             className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 bg-primary-foreground border border-border"
           >
             <img 
-              src="/lovable-uploads/27fb39a1-3ad1-43f1-9ce5-0b2d7ad619b7.png" 
+              src="/uploads/icon.png" 
               alt="Gyma AI" 
               className="w-full h-full object-cover"
             />
           </button>
-          <h1 className="text-2xl font-semibold text-gym-800">
+          <h1 className="text-2xl font-semibold text-gym-800 border-border" onClick={handleIconClick}>
             Gyma <span className="text-primary">AI</span>
           </h1>
         </div>
