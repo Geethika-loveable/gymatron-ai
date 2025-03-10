@@ -13,29 +13,27 @@ interface RestTimerProps {
 const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) => {
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
-  const timerRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
   const animationFrameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
-    // Clear any existing animation frames
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-
-    // Record the start time
+    // Reset the timer when the component mounts or when duration changes
+    setTimeLeft(duration);
+    setProgress(100);
     startTimeRef.current = Date.now();
-    
-    // Define the timer update function
+
+    // Update function for the timer
     const updateTimer = () => {
-      const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      const remaining = Math.max(0, duration - elapsedSeconds);
+      const elapsedMs = Date.now() - startTimeRef.current;
+      const elapsedSeconds = elapsedMs / 1000;
+      const newTimeLeft = Math.max(0, duration - Math.floor(elapsedSeconds));
+      const newProgress = (newTimeLeft / duration) * 100;
       
-      setTimeLeft(remaining);
-      setProgress((remaining / duration) * 100);
+      setTimeLeft(newTimeLeft);
+      setProgress(newProgress);
       
-      if (remaining <= 0) {
-        // Timer complete
+      if (newTimeLeft <= 0) {
+        // Timer is complete
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
           animationFrameRef.current = null;
@@ -55,6 +53,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     };
   }, [duration, onComplete]);
