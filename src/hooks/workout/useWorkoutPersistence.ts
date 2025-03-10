@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from '@/hooks/useAuthState';
 import { toast } from '@/components/ui/use-toast';
 import { WorkoutState } from './useWorkoutState';
+import { Json } from '@/integrations/supabase/types';
 
 interface WorkoutSession {
   id: string;
@@ -15,6 +16,19 @@ interface WorkoutSession {
   started_at: string;
   stopwatch_time: number;
   exercises: Exercise[];
+  last_updated_at: string;
+}
+
+// Define a type that matches what's in the database
+interface WorkoutSessionDB {
+  id: string;
+  user_id: string;
+  is_active: boolean;
+  current_exercise_index: number;
+  current_set: number;
+  started_at: string;
+  stopwatch_time: number;
+  exercises: Json;
   last_updated_at: string;
 }
 
@@ -119,17 +133,23 @@ export const useWorkoutPersistence = ({
       }
       
       if (data) {
-        // Found active session
-        setSessionId(data.id);
-        setRestoredSession(data as WorkoutSession);
+        // Found active session - convert from database format to our app format
+        const dbSession = data as WorkoutSessionDB;
+        const appSession: WorkoutSession = {
+          ...dbSession,
+          exercises: dbSession.exercises as unknown as Exercise[]
+        };
+        
+        setSessionId(appSession.id);
+        setRestoredSession(appSession);
         
         // Calculate elapsed time since last update
-        const lastUpdatedAt = new Date(data.last_updated_at).getTime();
+        const lastUpdatedAt = new Date(appSession.last_updated_at).getTime();
         const now = Date.now();
         const additionalTime = now - lastUpdatedAt;
         
         // Total time is stored time plus elapsed time since last update
-        const totalTime = data.stopwatch_time + additionalTime;
+        const totalTime = appSession.stopwatch_time + additionalTime;
         
         // Only restore state if setStopwatchTime is provided
         if (setStopwatchTime) {
@@ -138,8 +158,8 @@ export const useWorkoutPersistence = ({
         
         // Restore workout state
         setIsWorkoutStarted(true);
-        setCurrentExerciseIndex(data.current_exercise_index);
-        setCurrentSet(data.current_set);
+        setCurrentExerciseIndex(appSession.current_exercise_index);
+        setCurrentSet(appSession.current_set);
         
         toast({
           title: "Workout Restored",

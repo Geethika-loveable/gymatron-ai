@@ -14,13 +14,20 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
   const timerRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
+  const startTimeRef = useRef<number>(Date.now());
+  const completedRef = useRef<boolean>(false);
 
   useEffect(() => {
-    // Reset timer when component mounts or duration changes
+    // Reset timer and references when component mounts or duration changes
     startTimeRef.current = Date.now();
+    completedRef.current = false;
     setTimeLeft(duration);
     setProgress(100);
+    
+    // Clear any existing interval
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
     
     timerRef.current = window.setInterval(() => {
       const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -29,9 +36,11 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
       setTimeLeft(remaining);
       setProgress((remaining / duration) * 100);
       
-      if (remaining <= 0) {
+      if (remaining <= 0 && !completedRef.current) {
+        completedRef.current = true;
         if (timerRef.current) {
           clearInterval(timerRef.current);
+          timerRef.current = null;
         }
         playBellSound();
         onComplete();
