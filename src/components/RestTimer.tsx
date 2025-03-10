@@ -14,10 +14,13 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
   const timerRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
+    // Reset timer when component mounts or duration changes
     startTimeRef.current = Date.now();
+    setTimeLeft(duration);
+    setProgress(100);
     
     timerRef.current = window.setInterval(() => {
       const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);

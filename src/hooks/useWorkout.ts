@@ -1,6 +1,6 @@
 
 import { Exercise } from '@/components/ExerciseForm';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useWorkoutState } from './workout/useWorkoutState';
 import { useWorkoutActions } from './workout/useWorkoutActions';
 import { useWorkoutPersistence } from './workout/useWorkoutPersistence';
@@ -45,12 +45,13 @@ export const useWorkout = (exercises: Exercise[]) => {
     setTimerType
   });
 
-  // Integrate persistence
+  // Integrate persistence with the ability to set stopwatch time
   const {
     isLoading,
     sessionId,
     resetWithPersistence,
-    syncWorkoutState
+    syncWorkoutState,
+    restoredSession
   } = useWorkoutPersistence({
     exercises,
     workoutState,
@@ -58,7 +59,8 @@ export const useWorkout = (exercises: Exercise[]) => {
     resetWorkout: resetWorkoutBase,
     setCurrentExerciseIndex,
     setCurrentSet,
-    setIsWorkoutStarted
+    setIsWorkoutStarted,
+    setStopwatchTime
   });
 
   // Wrap actions with persistence
@@ -101,6 +103,7 @@ export const useWorkout = (exercises: Exercise[]) => {
     handleRestTimerComplete,
     resetWorkout,
     completeSet,
-    updateStopwatchTime
+    updateStopwatchTime,
+    setStopwatchTime
   };
 };

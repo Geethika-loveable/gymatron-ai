@@ -15,6 +15,7 @@ interface WorkoutSession {
   started_at: string;
   stopwatch_time: number;
   exercises: Exercise[];
+  last_updated_at: string;
 }
 
 interface UseWorkoutPersistenceProps {
@@ -25,6 +26,7 @@ interface UseWorkoutPersistenceProps {
   setCurrentExerciseIndex: (index: number) => void;
   setCurrentSet: (set: number) => void;
   setIsWorkoutStarted: (started: boolean) => void;
+  setStopwatchTime?: (time: number) => void;
 }
 
 export const useWorkoutPersistence = ({
@@ -34,13 +36,15 @@ export const useWorkoutPersistence = ({
   resetWorkout,
   setCurrentExerciseIndex,
   setCurrentSet,
-  setIsWorkoutStarted
+  setIsWorkoutStarted,
+  setStopwatchTime
 }: UseWorkoutPersistenceProps) => {
   const { isSignedIn } = useAuthState();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const lastSyncedRef = useRef<number>(Date.now());
   const syncIntervalRef = useRef<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [restoredSession, setRestoredSession] = useState<WorkoutSession | null>(null);
 
   // Check for active session on mount
   useEffect(() => {
@@ -117,6 +121,20 @@ export const useWorkoutPersistence = ({
       if (data) {
         // Found active session
         setSessionId(data.id);
+        setRestoredSession(data as WorkoutSession);
+        
+        // Calculate elapsed time since last update
+        const lastUpdatedAt = new Date(data.last_updated_at).getTime();
+        const now = Date.now();
+        const additionalTime = now - lastUpdatedAt;
+        
+        // Total time is stored time plus elapsed time since last update
+        const totalTime = data.stopwatch_time + additionalTime;
+        
+        // Only restore state if setStopwatchTime is provided
+        if (setStopwatchTime) {
+          setStopwatchTime(totalTime);
+        }
         
         // Restore workout state
         setIsWorkoutStarted(true);
@@ -242,6 +260,7 @@ export const useWorkoutPersistence = ({
     isLoading,
     sessionId,
     resetWithPersistence,
-    syncWorkoutState
+    syncWorkoutState,
+    restoredSession
   };
 };

@@ -18,6 +18,13 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   const [time, setTime] = useState<number>(initialTime);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(Date.now() - initialTime);
+
+  // Initialize with initialTime
+  useEffect(() => {
+    setTime(initialTime);
+    startTimeRef.current = Date.now() - initialTime;
+  }, [initialTime]);
 
   // Auto-start when workout begins
   useEffect(() => {
@@ -35,10 +42,10 @@ const Stopwatch: React.FC<StopwatchProps> = ({
 
   const startTimer = () => {
     setIsRunning(true);
-    const startTime = Date.now() - time;
+    // Use the current startTimeRef which may have been adjusted for initialTime
     
     intervalRef.current = window.setInterval(() => {
-      const currentTime = Date.now() - startTime;
+      const currentTime = Date.now() - startTimeRef.current;
       setTime(currentTime);
     }, 10);
   };
@@ -54,6 +61,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   const resetTimer = () => {
     pauseTimer();
     setTime(0);
+    startTimeRef.current = Date.now();
   };
 
   // Cleanup interval on unmount
