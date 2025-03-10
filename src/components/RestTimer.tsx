@@ -15,11 +15,19 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
   const [progress, setProgress] = useState<number>(100);
   const timerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Clear any existing animation frames
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    // Record the start time
     startTimeRef.current = Date.now();
     
-    timerRef.current = window.setInterval(() => {
+    // Define the timer update function
+    const updateTimer = () => {
       const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
       const remaining = Math.max(0, duration - elapsedSeconds);
       
@@ -27,17 +35,26 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
       setProgress((remaining / duration) * 100);
       
       if (remaining <= 0) {
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
+        // Timer complete
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
         }
         playBellSound();
         onComplete();
+      } else {
+        // Continue the timer
+        animationFrameRef.current = requestAnimationFrame(updateTimer);
       }
-    }, 100);
-
+    };
+    
+    // Start the timer
+    animationFrameRef.current = requestAnimationFrame(updateTimer);
+    
+    // Cleanup on unmount or when duration changes
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [duration, onComplete]);

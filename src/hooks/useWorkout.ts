@@ -13,6 +13,7 @@ export const useWorkout = (exercises: Exercise[]) => {
     workoutStartTime,
     stopwatchTime,
     isRestoringState,
+    savedExercises,
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
     setCurrentSet,
@@ -29,7 +30,7 @@ export const useWorkout = (exercises: Exercise[]) => {
     resetWorkout,
     completeSet
   } = useWorkoutActions({
-    exercises,
+    exercises: exercises.length > 0 ? exercises : savedExercises,
     state: {
       isWorkoutStarted,
       currentExerciseIndex,
@@ -46,8 +47,9 @@ export const useWorkout = (exercises: Exercise[]) => {
     resetWorkoutState
   });
 
-  const currentExercise = isWorkoutStarted && exercises.length > 0 
-    ? exercises[currentExerciseIndex] 
+  const effectiveExercises = exercises.length > 0 ? exercises : savedExercises;
+  const currentExercise = isWorkoutStarted && effectiveExercises.length > 0 
+    ? effectiveExercises[currentExerciseIndex] 
     : undefined;
 
   return {
@@ -60,6 +62,7 @@ export const useWorkout = (exercises: Exercise[]) => {
     workoutStartTime,
     stopwatchTime,
     isRestoringState,
+    savedExercises,
     updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,

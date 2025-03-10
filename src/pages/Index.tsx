@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import WorkoutSetup from '@/components/WorkoutSetup';
@@ -14,7 +14,8 @@ const Index = () => {
     isSignedIn, 
     loading, 
     addExercise, 
-    deleteExercise 
+    deleteExercise,
+    setExercises
   } = useExerciseData();
   
   const {
@@ -26,6 +27,7 @@ const Index = () => {
     workoutStartTime,
     stopwatchTime,
     isRestoringState,
+    savedExercises,
     updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,
@@ -33,8 +35,16 @@ const Index = () => {
     completeSet
   } = useWorkout(exercises);
 
+  // Restore saved exercises if needed
+  useEffect(() => {
+    if (isWorkoutStarted && savedExercises && savedExercises.length > 0 && exercises.length === 0) {
+      console.log('Restoring saved exercises:', savedExercises);
+      setExercises(savedExercises);
+    }
+  }, [isWorkoutStarted, exercises.length, savedExercises, setExercises]);
+
   // Show toast if we're restoring a workout
-  React.useEffect(() => {
+  useEffect(() => {
     if (isWorkoutStarted && !isRestoringState) {
       toast({
         title: "Workout Restored",
@@ -66,7 +76,7 @@ const Index = () => {
           />
         ) : (
           <ActiveWorkout 
-            exercises={exercises}
+            exercises={exercises.length > 0 ? exercises : savedExercises}
             showRestTimer={showRestTimer}
             timerType={timerType}
             currentExercise={currentExercise}

@@ -68,6 +68,7 @@ export const useExerciseData = () => {
     loading,
     addExercise,
     deleteExercise,
-    loadUserExercises
+    loadUserExercises,
+    setExercises // Expose this to allow setting exercises from saved state
   };
 };

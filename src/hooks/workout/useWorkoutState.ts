@@ -25,6 +25,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
   const [workoutStartTime, setWorkoutStartTime] = useState(0);
   const [stopwatchTime, setStopwatchTime] = useState(0);
   const [isRestoringState, setIsRestoringState] = useState(true);
+  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
   
   const { 
     saveWorkoutState, 
@@ -44,7 +45,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
         currentSet,
         showRestTimer,
         timerType,
-        exercises,
+        exercises: exercises.length > 0 ? exercises : savedExercises,
         workoutStartTime,
         stopwatchTime,
         lastSavedAt: Date.now()
@@ -60,6 +61,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     currentSet, 
     showRestTimer, 
     exercises, 
+    savedExercises,
     workoutStartTime,
     stopwatchTime,
     saveWorkoutState
@@ -76,7 +78,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
         currentSet,
         showRestTimer,
         timerType,
-        exercises,
+        exercises: exercises.length > 0 ? exercises : savedExercises,
         workoutStartTime,
         stopwatchTime,
         lastSavedAt: Date.now()
@@ -95,6 +97,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     showRestTimer,
     timerType,
     exercises,
+    savedExercises,
     workoutStartTime,
     stopwatchTime,
     saveWorkoutState
@@ -118,6 +121,11 @@ export const useWorkoutState = (exercises: Exercise[]) => {
         setTimerType(savedState.timerType);
         setWorkoutStartTime(savedState.workoutStartTime);
         setStopwatchTime(savedState.stopwatchTime);
+        
+        // Save the exercises from local storage
+        if (savedState.exercises && savedState.exercises.length > 0) {
+          setSavedExercises(savedState.exercises);
+        }
       }
     } catch (error) {
       console.error('Error restoring workout state:', error);
@@ -144,6 +152,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     setTimerType('set');
     setWorkoutStartTime(0);
     setStopwatchTime(0);
+    setSavedExercises([]);
     clearWorkoutState();
   };
 
@@ -157,6 +166,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     workoutStartTime,
     stopwatchTime,
     isRestoringState,
+    savedExercises,
     // State setters
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
