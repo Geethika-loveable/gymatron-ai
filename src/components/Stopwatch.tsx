@@ -6,56 +6,26 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface StopwatchProps {
   isWorkoutStarted: boolean;
-  onTimeUpdate?: (time: number) => void;
-  initialTime?: number;
 }
 
-const Stopwatch: React.FC<StopwatchProps> = ({ 
-  isWorkoutStarted, 
-  onTimeUpdate,
-  initialTime = 0
-}) => {
-  const [time, setTime] = useState<number>(initialTime);
+const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
+  const [time, setTime] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(Date.now() - initialTime);
-  const previousTimeRef = useRef<number>(initialTime);
-
-  // Initialize with initialTime
-  useEffect(() => {
-    setTime(initialTime);
-    startTimeRef.current = Date.now() - initialTime;
-    previousTimeRef.current = initialTime;
-  }, [initialTime]);
 
   // Auto-start when workout begins
   useEffect(() => {
     if (isWorkoutStarted && !isRunning) {
       startTimer();
-    } else if (!isWorkoutStarted && isRunning) {
-      // Just pause the timer when workout ends, don't reset
-      pauseTimer();
     }
   }, [isWorkoutStarted]);
 
-  // Report time updates to parent
-  useEffect(() => {
-    if (onTimeUpdate) {
-      onTimeUpdate(time);
-    }
-  }, [time, onTimeUpdate]);
-
   const startTimer = () => {
-    if (isRunning) return;
-    
     setIsRunning(true);
-    // Use the current startTimeRef which may have been adjusted for initialTime
-    startTimeRef.current = Date.now() - previousTimeRef.current;
+    const startTime = Date.now() - time;
     
     intervalRef.current = window.setInterval(() => {
-      const currentTime = Date.now() - startTimeRef.current;
-      setTime(currentTime);
-      previousTimeRef.current = currentTime;
+      setTime(Date.now() - startTime);
     }, 10);
   };
 
@@ -65,15 +35,11 @@ const Stopwatch: React.FC<StopwatchProps> = ({
       intervalRef.current = null;
     }
     setIsRunning(false);
-    // Store the current time value when pausing
-    previousTimeRef.current = time;
   };
 
   const resetTimer = () => {
     pauseTimer();
     setTime(0);
-    startTimeRef.current = Date.now();
-    previousTimeRef.current = 0;
   };
 
   // Cleanup interval on unmount

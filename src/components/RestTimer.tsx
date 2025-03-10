@@ -13,59 +13,31 @@ interface RestTimerProps {
 const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) => {
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
-  
-  const endTimeRef = useRef<number>(0);
-  const animationFrameRef = useRef<number | null>(null);
-  const completedRef = useRef<boolean>(false);
+  const timerRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
 
-  // Setup and start the timer when the component mounts
   useEffect(() => {
-    console.log("RestTimer mounted with duration:", duration);
+    startTimeRef.current = Date.now();
     
-    // Initialize timer state
-    setTimeLeft(duration);
-    setProgress(100);
-    completedRef.current = false;
-    
-    // Calculate the exact end time
-    const now = performance.now();
-    endTimeRef.current = now + (duration * 1000);
-    
-    // Define the animation frame callback
-    const updateTimer = (timestamp: number) => {
-      if (!endTimeRef.current) return;
-      
-      const remaining = Math.max(0, Math.ceil((endTimeRef.current - timestamp) / 1000));
-      const newProgress = (remaining / duration) * 100;
+    timerRef.current = window.setInterval(() => {
+      const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const remaining = Math.max(0, duration - elapsedSeconds);
       
       setTimeLeft(remaining);
-      setProgress(newProgress);
+      setProgress((remaining / duration) * 100);
       
-      // Check if timer has completed
-      if (remaining <= 0 && !completedRef.current) {
-        console.log("Timer complete!");
-        completedRef.current = true;
-        playBellSound();
-        
-        if (typeof onComplete === 'function') {
-          onComplete();
+      if (remaining <= 0) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
         }
-        return; // Stop requesting animation frames
+        playBellSound();
+        onComplete();
       }
-      
-      // Continue the animation
-      animationFrameRef.current = requestAnimationFrame(updateTimer);
-    };
-    
-    // Start the animation loop
-    animationFrameRef.current = requestAnimationFrame(updateTimer);
-    
-    // Cleanup on unmount
+    }, 100);
+
     return () => {
-      console.log("RestTimer unmounting, cleaning up");
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
       }
     };
   }, [duration, onComplete]);

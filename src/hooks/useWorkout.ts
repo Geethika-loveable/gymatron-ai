@@ -1,13 +1,9 @@
 
 import { Exercise } from '@/components/ExerciseForm';
-import { useState, useRef, useEffect } from 'react';
 import { useWorkoutState } from './workout/useWorkoutState';
 import { useWorkoutActions } from './workout/useWorkoutActions';
-import { useWorkoutPersistence } from './workout/useWorkoutPersistence';
 
 export const useWorkout = (exercises: Exercise[]) => {
-  const [stopwatchTime, setStopwatchTime] = useState(0);
-  
   const {
     isWorkoutStarted,
     currentExerciseIndex,
@@ -21,70 +17,26 @@ export const useWorkout = (exercises: Exercise[]) => {
     setTimerType
   } = useWorkoutState();
 
-  const workoutState = {
-    isWorkoutStarted,
-    currentExerciseIndex,
-    currentSet,
-    showRestTimer,
-    timerType
-  };
-
-  // Create actions but don't use them directly yet
   const {
-    startWorkout: startWorkoutBase,
-    handleRestTimerComplete: handleRestTimerCompleteBase,
-    resetWorkout: resetWorkoutBase,
-    completeSet: completeSetBase
+    startWorkout,
+    handleRestTimerComplete,
+    resetWorkout,
+    completeSet
   } = useWorkoutActions({
     exercises,
-    state: workoutState,
+    state: {
+      isWorkoutStarted,
+      currentExerciseIndex,
+      currentSet,
+      showRestTimer,
+      timerType
+    },
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
     setCurrentSet,
     setShowRestTimer,
     setTimerType
   });
-
-  // Integrate persistence with the ability to set stopwatch time
-  const {
-    isLoading,
-    sessionId,
-    resetWithPersistence,
-    syncWorkoutState,
-    restoredSession
-  } = useWorkoutPersistence({
-    exercises,
-    workoutState,
-    stopwatchTime,
-    resetWorkout: resetWorkoutBase,
-    setCurrentExerciseIndex,
-    setCurrentSet,
-    setIsWorkoutStarted,
-    setStopwatchTime
-  });
-
-  // Wrap actions with persistence
-  const startWorkout = () => {
-    startWorkoutBase();
-  };
-
-  const handleRestTimerComplete = () => {
-    handleRestTimerCompleteBase();
-    syncWorkoutState();
-  };
-
-  const resetWorkout = () => {
-    resetWithPersistence();
-  };
-
-  const completeSet = () => {
-    completeSetBase();
-    syncWorkoutState();
-  };
-
-  const updateStopwatchTime = (time: number) => {
-    setStopwatchTime(time);
-  };
 
   const currentExercise = isWorkoutStarted && exercises.length > 0 
     ? exercises[currentExerciseIndex] 
@@ -97,13 +49,9 @@ export const useWorkout = (exercises: Exercise[]) => {
     showRestTimer,
     timerType,
     currentExercise,
-    isLoading,
-    stopwatchTime,
     startWorkout,
     handleRestTimerComplete,
     resetWorkout,
-    completeSet,
-    updateStopwatchTime,
-    setStopwatchTime
+    completeSet
   };
 };

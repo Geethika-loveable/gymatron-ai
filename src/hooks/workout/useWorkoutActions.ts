@@ -11,7 +11,6 @@ interface WorkoutActionsProps {
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
   setTimerType: (value: 'set' | 'exercise') => void;
-  onWorkoutEnd?: () => void;
 }
 
 export const useWorkoutActions = ({
@@ -21,8 +20,7 @@ export const useWorkoutActions = ({
   setCurrentExerciseIndex, 
   setCurrentSet,
   setShowRestTimer,
-  setTimerType,
-  onWorkoutEnd
+  setTimerType
 }: WorkoutActionsProps) => {
   const startWorkout = () => {
     if (exercises.length === 0) {
@@ -37,7 +35,6 @@ export const useWorkoutActions = ({
     setIsWorkoutStarted(true);
     setCurrentExerciseIndex(0);
     setCurrentSet(0);
-    setShowRestTimer(false);
     toast({
       title: "Workout started!",
       description: `Starting with ${exercises[0].name}`,
@@ -45,43 +42,27 @@ export const useWorkoutActions = ({
   };
 
   const handleRestTimerComplete = () => {
-    // Process what happens after rest period completes
-    console.log("Rest timer complete, processing next actions");
-    
-    // First hide the timer completely
     setShowRestTimer(false);
     
     if (state.timerType === 'set') {
       // Move to next set
       const nextSet = state.currentSet + 1;
-      
-      // Check if we have more sets in this exercise
       if (nextSet < exercises[state.currentExerciseIndex].sets) {
-        // Move to next set of the current exercise
         setCurrentSet(nextSet);
       } else {
         // All sets completed for this exercise
         const nextExerciseIndex = state.currentExerciseIndex + 1;
         
         if (nextExerciseIndex < exercises.length) {
-          // Move to the first set of the next exercise
+          // Move to next exercise
           setCurrentExerciseIndex(nextExerciseIndex);
           setCurrentSet(0);
-          
           // Start exercise rest timer
           setTimerType('exercise');
-          
-          // Add a small delay to ensure state updates have propagated
-          // before showing the rest timer
-          setTimeout(() => {
-            setShowRestTimer(true);
-          }, 100);
+          setShowRestTimer(true);
         } else {
           // Workout complete
           setIsWorkoutStarted(false);
-          if (onWorkoutEnd) {
-            onWorkoutEnd();
-          }
           toast({
             title: "Workout completed",
             description: "Great job! You've completed your workout.",
@@ -99,15 +80,8 @@ export const useWorkoutActions = ({
   };
 
   const completeSet = () => {
-    // Update the timer type first
-    console.log("Set completed, showing rest timer");
     setTimerType('set');
-    
-    // Add a slight delay to ensure state is updated
-    // before showing the rest timer
-    setTimeout(() => {
-      setShowRestTimer(true);
-    }, 100);
+    setShowRestTimer(true);
   };
 
   return {

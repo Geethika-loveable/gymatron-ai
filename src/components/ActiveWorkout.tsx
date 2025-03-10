@@ -26,19 +26,14 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   onCompleteSet,
   onEndWorkout
 }) => {
-  // Generate a unique key that changes whenever we want a fresh timer instance
-  const timerKey = `${timerType}-${currentExercise?.id || 'none'}-${currentSet}-${Date.now()}`;
-  
   return (
     <>
       {showRestTimer ? (
-        <div key={timerKey} className="w-full">
-          <RestTimer
-            duration={timerType === 'set' ? 30 : 60} 
-            onComplete={onRestTimerComplete} 
-            label={timerType === 'set' ? 'Rest Between Sets' : 'Rest Between Exercises'} 
-          />
-        </div>
+        <RestTimer 
+          duration={timerType === 'set' ? 30 : 60} 
+          onComplete={onRestTimerComplete} 
+          label={timerType === 'set' ? 'Rest Between Sets' : 'Rest Between Exercises'} 
+        />
       ) : (
         <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-fade-in flex items-center justify-center">
           <div className="text-center">
