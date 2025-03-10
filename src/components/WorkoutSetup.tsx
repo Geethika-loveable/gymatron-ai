@@ -34,6 +34,7 @@ const WorkoutSetup: React.FC<WorkoutSetupProps> = ({
         onDeleteExercise={onDeleteExercise}
         isSignedIn={isSignedIn}
         loading={loading}
+        onOpenAuthModal={onOpenAuthModal} // Pass the prop to ExerciseList
       />
       
       {exercises.length > 0 && (
