@@ -1,97 +1,195 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
+import { useLocalWorkoutPersistence } from './useLocalWorkoutPersistence';
 
 export interface WorkoutState {
   isWorkoutStarted: boolean;
   currentExerciseIndex: number;
   currentSet: number;
   showRestTimer: boolean;
-  timerType: 'set' | 'exercise'; 
-  isWorkoutCompleted: boolean;
-  workoutStartTime: number | null;
-  stopwatchTime: number;
-  isRestoringState: boolean;
-  savedExercises: Exercise[];
+  timerType: 'set' | 'exercise';
 }
 
-export const useWorkoutState = (initialExercises: Exercise[] = []) => {
-  const [state, setState] = useState<WorkoutState>({
+export interface WorkoutStateWithTime extends WorkoutState {
+  workoutStartTime: number;
+  stopwatchTime: number;
+}
+
+export const useWorkoutState = (exercises: Exercise[]) => {
+  const stateRef = useRef({
     isWorkoutStarted: false,
     currentExerciseIndex: 0,
-    currentSet: 1,
+    currentSet: 0,
     showRestTimer: false,
-    timerType: 'set',
-    isWorkoutCompleted: false,
-    workoutStartTime: null,
+    timerType: 'set' as const,
+    workoutStartTime: 0,
     stopwatchTime: 0,
-    isRestoringState: false,
-    savedExercises: [],
   });
+  
+  const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [currentSet, setCurrentSet] = useState(0);
+  const [showRestTimer, setShowRestTimer] = useState(false);
+  const [timerType, setTimerType] = useState<'set' | 'exercise'>('set');
+  const [workoutStartTime, setWorkoutStartTime] = useState(0);
+  const [stopwatchTime, setStopwatchTime] = useState(0);
+  const [isRestoringState, setIsRestoringState] = useState(true);
+  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
+  
+  const { 
+    saveWorkoutState, 
+    loadWorkoutState, 
+    clearWorkoutState,
+    isInitialized 
+  } = useLocalWorkoutPersistence();
 
-  // Create individual setters for each state property
-  const setIsWorkoutStarted = useCallback((value: boolean) => {
-    setState(prevState => ({ ...prevState, isWorkoutStarted: value }));
+  const lastSaveTimeRef = useRef<number>(0);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    stateRef.current = {
+      isWorkoutStarted,
+      currentExerciseIndex,
+      currentSet,
+      showRestTimer,
+      timerType,
+      workoutStartTime,
+      stopwatchTime,
+    };
+  }, [
+    isWorkoutStarted,
+    currentExerciseIndex,
+    currentSet,
+    showRestTimer,
+    timerType,
+    workoutStartTime,
+    stopwatchTime,
+  ]);
+
+  const throttledSave = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastSave = now - lastSaveTimeRef.current;
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
+    if (timeSinceLastSave < 2000) {
+      saveTimeoutRef.current = setTimeout(() => {
+        saveState();
+        saveTimeoutRef.current = null;
+      }, 2000 - timeSinceLastSave);
+      return;
+    }
+    
+    saveState();
   }, []);
 
-  const setCurrentExerciseIndex = useCallback((value: number) => {
-    setState(prevState => ({ ...prevState, currentExerciseIndex: value }));
-  }, []);
+  const saveState = useCallback(() => {
+    if (!isInitialized || isRestoringState || !stateRef.current.isWorkoutStarted) return;
+    
+    const stateToSave = {
+      ...stateRef.current,
+      exercises: exercises.length > 0 ? exercises : savedExercises,
+      lastSavedAt: Date.now()
+    };
+    
+    saveWorkoutState(stateToSave);
+    lastSaveTimeRef.current = Date.now();
+  }, [isInitialized, isRestoringState, exercises, savedExercises, saveWorkoutState]);
 
-  const setCurrentSet = useCallback((value: number) => {
-    setState(prevState => ({ ...prevState, currentSet: value }));
-  }, []);
+  useEffect(() => {
+    if (!isInitialized || isRestoringState) return;
+    
+    if (isWorkoutStarted) {
+      throttledSave();
+    }
+  }, [
+    isInitialized,
+    isRestoringState,
+    isWorkoutStarted, 
+    currentExerciseIndex, 
+    currentSet, 
+    showRestTimer,
+    throttledSave
+  ]);
 
-  const setShowRestTimer = useCallback((value: boolean) => {
-    setState(prevState => ({ ...prevState, showRestTimer: value }));
-  }, []);
+  useEffect(() => {
+    if (!isWorkoutStarted || !isInitialized || isRestoringState) return;
+    
+    const saveInterval = setInterval(() => {
+      saveState();
+    }, 10000);
+    
+    return () => clearInterval(saveInterval);
+  }, [
+    isInitialized,
+    isRestoringState,
+    isWorkoutStarted,
+    saveState
+  ]);
 
-  const setTimerType = useCallback((value: 'set' | 'exercise') => {
-    setState(prevState => ({ ...prevState, timerType: value }));
-  }, []);
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    try {
+      const savedState = loadWorkoutState();
+      
+      if (savedState && savedState.isWorkoutStarted) {
+        console.log('Restoring workout state:', savedState);
+        
+        setIsWorkoutStarted(savedState.isWorkoutStarted);
+        setCurrentExerciseIndex(savedState.currentExerciseIndex);
+        setCurrentSet(savedState.currentSet);
+        setShowRestTimer(savedState.showRestTimer);
+        setTimerType(savedState.timerType);
+        setWorkoutStartTime(savedState.workoutStartTime);
+        setStopwatchTime(savedState.stopwatchTime);
+        
+        if (savedState.exercises && savedState.exercises.length > 0) {
+          setSavedExercises(savedState.exercises);
+        }
+      }
+    } catch (error) {
+      console.error('Error restoring workout state:', error);
+    } finally {
+      setIsRestoringState(false);
+    }
+  }, [isInitialized, loadWorkoutState]);
 
   const updateStopwatchTime = useCallback((time: number) => {
-    setState(prevState => ({ ...prevState, stopwatchTime: time }));
+    setStopwatchTime(time);
   }, []);
 
   const startNewWorkout = useCallback(() => {
-    setState(prevState => ({
-      ...prevState,
-      isWorkoutStarted: true,
-      workoutStartTime: Date.now(),
-      savedExercises: initialExercises.length > 0 ? initialExercises : prevState.savedExercises
-    }));
-  }, [initialExercises]);
-
-  const resetWorkoutState = useCallback(() => {
-    setState({
-      isWorkoutStarted: false,
-      currentExerciseIndex: 0,
-      currentSet: 1,
-      showRestTimer: false,
-      timerType: 'set',
-      isWorkoutCompleted: false,
-      workoutStartTime: null,
-      stopwatchTime: 0,
-      isRestoringState: false,
-      savedExercises: [],
-    });
+    setWorkoutStartTime(Date.now());
+    setStopwatchTime(0);
+    setIsWorkoutStarted(true);
   }, []);
 
+  const resetWorkoutState = useCallback(() => {
+    setIsWorkoutStarted(false);
+    setCurrentExerciseIndex(0);
+    setCurrentSet(0);
+    setShowRestTimer(false);
+    setTimerType('set');
+    setWorkoutStartTime(0);
+    setStopwatchTime(0);
+    setSavedExercises([]);
+    clearWorkoutState();
+  }, [clearWorkoutState]);
+
   return {
-    // Expose all state properties
-    isWorkoutStarted: state.isWorkoutStarted,
-    currentExerciseIndex: state.currentExerciseIndex,
-    currentSet: state.currentSet,
-    showRestTimer: state.showRestTimer,
-    timerType: state.timerType,
-    isWorkoutCompleted: state.isWorkoutCompleted,
-    workoutStartTime: state.workoutStartTime,
-    stopwatchTime: state.stopwatchTime,
-    isRestoringState: state.isRestoringState,
-    savedExercises: state.savedExercises,
-    
-    // Expose all setter functions
+    isWorkoutStarted,
+    currentExerciseIndex,
+    currentSet,
+    showRestTimer,
+    timerType,
+    workoutStartTime,
+    stopwatchTime,
+    isRestoringState,
+    savedExercises,
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
     setCurrentSet,
@@ -99,10 +197,6 @@ export const useWorkoutState = (initialExercises: Exercise[] = []) => {
     setTimerType,
     updateStopwatchTime,
     startNewWorkout,
-    resetWorkoutState,
-    
-    // For convenience, also expose the raw state and setState
-    state,
-    setState,
+    resetWorkoutState
   };
 };
