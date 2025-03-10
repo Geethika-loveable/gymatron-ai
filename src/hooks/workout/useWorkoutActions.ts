@@ -37,6 +37,7 @@ export const useWorkoutActions = ({
     setIsWorkoutStarted(true);
     setCurrentExerciseIndex(0);
     setCurrentSet(0);
+    setShowRestTimer(false);
     toast({
       title: "Workout started!",
       description: `Starting with ${exercises[0].name}`,
@@ -44,25 +45,33 @@ export const useWorkoutActions = ({
   };
 
   const handleRestTimerComplete = () => {
-    // First hide the timer
+    // First hide the timer to prevent any race conditions
     setShowRestTimer(false);
     
     if (state.timerType === 'set') {
       // Move to next set
       const nextSet = state.currentSet + 1;
+      
+      // Check if we have more sets in this exercise
       if (nextSet < exercises[state.currentExerciseIndex].sets) {
+        // Move to next set of the current exercise
         setCurrentSet(nextSet);
       } else {
         // All sets completed for this exercise
         const nextExerciseIndex = state.currentExerciseIndex + 1;
         
         if (nextExerciseIndex < exercises.length) {
-          // Move to next exercise
+          // Move to the first set of the next exercise
           setCurrentExerciseIndex(nextExerciseIndex);
           setCurrentSet(0);
+          
           // Start exercise rest timer
           setTimerType('exercise');
-          setShowRestTimer(true);
+          
+          // Add a small delay to ensure state updates have propagated
+          setTimeout(() => {
+            setShowRestTimer(true);
+          }, 50);
         } else {
           // Workout complete
           setIsWorkoutStarted(false);
@@ -86,9 +95,13 @@ export const useWorkoutActions = ({
   };
 
   const completeSet = () => {
-    // First set the timer type, then show the timer to force a remount
+    // Set the timer type first
     setTimerType('set');
-    setShowRestTimer(true);
+    
+    // Add a small delay to ensure state updates have propagated
+    setTimeout(() => {
+      setShowRestTimer(true);
+    }, 50);
   };
 
   return {

@@ -26,8 +26,9 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   onCompleteSet,
   onEndWorkout
 }) => {
-  // Use a unique key for the RestTimer component to force re-mount when timer changes
-  const timerKey = `${timerType}-${currentExercise?.id || 'none'}-${currentSet}-${showRestTimer ? 'show' : 'hide'}`;
+  // Generate a unique key for the RestTimer component to force a complete remount
+  // whenever any of the key timer properties change
+  const timerKey = `rest-timer-${timerType}-${currentExercise?.id || 'none'}-${currentSet}-${showRestTimer ? 'visible' : 'hidden'}-${Date.now()}`;
   
   return (
     <>

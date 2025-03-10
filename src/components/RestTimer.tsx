@@ -14,44 +14,55 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
   const timerRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
+  const endTimeRef = useRef<number>(0);
   const completedRef = useRef<boolean>(false);
 
+  // Setup and start the timer when the component mounts
   useEffect(() => {
-    // Reset timer and references when component mounts or duration changes
-    startTimeRef.current = Date.now();
-    completedRef.current = false;
+    // Initialize timer state
     setTimeLeft(duration);
     setProgress(100);
+    completedRef.current = false;
+    
+    // Calculate the exact end time
+    const now = Date.now();
+    endTimeRef.current = now + (duration * 1000);
     
     // Clear any existing interval
     if (timerRef.current) {
-      clearInterval(timerRef.current);
+      window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
     
-    // Create a new interval
+    // Start a new timer that checks the remaining time every 100ms
     const interval = window.setInterval(() => {
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - startTimeRef.current) / 1000);
-      const remaining = Math.max(0, duration - elapsedSeconds);
+      const currentTime = Date.now();
+      const remaining = Math.max(0, Math.floor((endTimeRef.current - currentTime) / 1000));
       
       setTimeLeft(remaining);
       setProgress((remaining / duration) * 100);
       
+      // Check if timer has completed
       if (remaining <= 0 && !completedRef.current) {
         completedRef.current = true;
-        clearInterval(interval);
         playBellSound();
+        
+        // Clean up interval before calling onComplete to prevent any race conditions
+        if (timerRef.current) {
+          window.clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        
         onComplete();
       }
     }, 100);
     
     timerRef.current = interval;
-
+    
+    // Cleanup on unmount
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current);
+        window.clearInterval(timerRef.current);
         timerRef.current = null;
       }
     };
