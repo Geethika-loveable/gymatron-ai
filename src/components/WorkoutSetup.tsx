@@ -13,6 +13,7 @@ interface WorkoutSetupProps {
   onStartWorkout: () => void;
   isSignedIn: boolean;
   loading: boolean;
+  onOpenAuthModal: () => void; // New prop for opening the auth modal
 }
 
 const WorkoutSetup: React.FC<WorkoutSetupProps> = ({
@@ -21,7 +22,8 @@ const WorkoutSetup: React.FC<WorkoutSetupProps> = ({
   onDeleteExercise,
   onStartWorkout,
   isSignedIn,
-  loading
+  loading,
+  onOpenAuthModal
 }) => {
   return (
     <>

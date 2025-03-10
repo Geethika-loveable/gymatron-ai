@@ -1,14 +1,17 @@
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import WorkoutSetup from '@/components/WorkoutSetup';
 import ActiveWorkout from '@/components/ActiveWorkout';
 import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
+import AuthModal from '@/components/AuthModal';
 
 const Index = () => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
   const { 
     exercises, 
     isSignedIn, 
@@ -64,6 +67,14 @@ const Index = () => {
     updateStopwatchTime(time);
   }, [updateStopwatchTime]);
 
+  const handleOpenAuthModal = useCallback(() => {
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const handleCloseAuthModal = useCallback(() => {
+    setIsAuthModalOpen(false);
+  }, []);
+  
   // Restore saved exercises if needed
   useEffect(() => {
     if (isWorkoutStarted && savedExercises && savedExercises.length > 0 && exercises.length === 0) {
@@ -102,6 +113,7 @@ const Index = () => {
             onStartWorkout={handleStartWorkout}
             isSignedIn={isSignedIn}
             loading={loading || isRestoringState}
+            onOpenAuthModal={handleOpenAuthModal}
           />
         ) : (
           <ActiveWorkout 
@@ -116,6 +128,12 @@ const Index = () => {
           />
         )}
       </div>
+            
+      {/* Global Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={handleCloseAuthModal} 
+      />  
     </div>
   );
 };
