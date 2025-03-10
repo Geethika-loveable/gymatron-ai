@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
 import { WorkoutState } from './useWorkoutState';

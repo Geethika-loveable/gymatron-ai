@@ -12,7 +12,7 @@ interface WorkoutActionsProps {
   setCurrentExerciseIndex: (value: number) => void;
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
-  setTimerType: (value: 'set' | 'exercise') => void;
+  setTimerType: (value: 'set' | 'exercise') => void; // Updated type definition
   resetWorkoutState: () => void;
 }
 
@@ -116,8 +116,8 @@ export const useWorkoutActions = ({
   return {
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout: resetWorkoutState, // This will be replaced in useWorkout
+    resetWorkout: resetWorkoutState,
     completeSet,
-    endWorkout // Export the new method
+    endWorkout
   };
 };
