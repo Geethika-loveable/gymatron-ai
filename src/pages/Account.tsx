@@ -1,11 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { useToast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const Account = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -63,10 +64,24 @@ const Account = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <div className="container mx-auto px-4 py-6 max-w-md">
+      <div className="container mx-auto px-4 py-6 max-w-md flex-1">
+        <div className="flex items-center mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className="mr-2"
+          >
+            <Link to="/">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="sr-only">Back to Home</span>
+            </Link>
+          </Button>
+        </div>
+        
         <div className="glass-panel p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Your Account</h2>
           
@@ -91,6 +106,33 @@ const Account = () => {
           Sign Out
         </Button>
       </div>
+      
+      {/* Footer */}
+      <footer className="mt-auto py-6 bg-background border-t">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            &copy; All rights Reserved 2025.
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Gyma AI is a product of 
+            </span>
+            <a 
+              href="https://azynctra.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center hover:opacity-80 transition-opacity"
+            >
+              <img 
+                src="/lovable-uploads/b54d0993-7f8d-4e0a-9933-0c5417da5639.png"
+                alt="Azynctra" 
+                className="h-6" 
+              />
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
