@@ -45,7 +45,10 @@ export const useWorkoutActions = ({
   };
 
   const handleRestTimerComplete = () => {
-    // First hide the timer to prevent any race conditions
+    // Process what happens after rest period completes
+    console.log("Rest timer complete, processing next actions");
+    
+    // First hide the timer completely
     setShowRestTimer(false);
     
     if (state.timerType === 'set') {
@@ -69,9 +72,10 @@ export const useWorkoutActions = ({
           setTimerType('exercise');
           
           // Add a small delay to ensure state updates have propagated
+          // before showing the rest timer
           setTimeout(() => {
             setShowRestTimer(true);
-          }, 50);
+          }, 100);
         } else {
           // Workout complete
           setIsWorkoutStarted(false);
@@ -95,13 +99,15 @@ export const useWorkoutActions = ({
   };
 
   const completeSet = () => {
-    // Set the timer type first
+    // Update the timer type first
+    console.log("Set completed, showing rest timer");
     setTimerType('set');
     
-    // Add a small delay to ensure state updates have propagated
+    // Add a slight delay to ensure state is updated
+    // before showing the rest timer
     setTimeout(() => {
       setShowRestTimer(true);
-    }, 50);
+    }, 100);
   };
 
   return {
