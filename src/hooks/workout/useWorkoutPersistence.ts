@@ -141,14 +141,24 @@ export const useWorkoutPersistence = ({
     if (!isSignedIn) return;
     
     try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      
+      if (!userId) {
+        console.error('No user ID found');
+        return;
+      }
+      
+      // Convert Exercise[] to a plain object format that works with JSON
+      const exercisesJson = JSON.parse(JSON.stringify(exercises));
+
       const { data, error } = await supabase
         .from('workout_sessions')
         .insert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: userId,
           current_exercise_index: workoutState.currentExerciseIndex,
           current_set: workoutState.currentSet,
           stopwatch_time: stopwatchTime,
-          exercises: exercises
+          exercises: exercisesJson
         })
         .select()
         .single();
@@ -171,6 +181,9 @@ export const useWorkoutPersistence = ({
     if (!isSignedIn || !sessionId) return;
     
     try {
+      // Convert Exercise[] to a plain object format that works with JSON
+      const exercisesJson = JSON.parse(JSON.stringify(exercises));
+      
       const { error } = await supabase
         .from('workout_sessions')
         .update({
@@ -178,7 +191,7 @@ export const useWorkoutPersistence = ({
           current_set: workoutState.currentSet,
           stopwatch_time: stopwatchTime,
           last_updated_at: new Date().toISOString(),
-          exercises: exercises
+          exercises: exercisesJson
         })
         .eq('id', sessionId);
       
