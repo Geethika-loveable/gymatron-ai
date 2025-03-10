@@ -14,7 +14,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
   const [timeLeft, setTimeLeft] = useState<number>(duration);
   const [progress, setProgress] = useState<number>(100);
   const timerRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(0);
   const completedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -27,10 +27,13 @@ const RestTimer: React.FC<RestTimerProps> = ({ duration, onComplete, label }) =>
     // Clear any existing interval
     if (timerRef.current) {
       clearInterval(timerRef.current);
+      timerRef.current = null;
     }
     
+    // Create a new interval
     const interval = window.setInterval(() => {
-      const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      const now = Date.now();
+      const elapsedSeconds = Math.floor((now - startTimeRef.current) / 1000);
       const remaining = Math.max(0, duration - elapsedSeconds);
       
       setTimeLeft(remaining);

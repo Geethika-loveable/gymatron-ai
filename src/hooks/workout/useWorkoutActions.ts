@@ -44,6 +44,7 @@ export const useWorkoutActions = ({
   };
 
   const handleRestTimerComplete = () => {
+    // First hide the timer
     setShowRestTimer(false);
     
     if (state.timerType === 'set') {
@@ -85,6 +86,7 @@ export const useWorkoutActions = ({
   };
 
   const completeSet = () => {
+    // First set the timer type, then show the timer to force a remount
     setTimerType('set');
     setShowRestTimer(true);
   };
