@@ -57,6 +57,42 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_sessions: {
+        Row: {
+          current_exercise_index: number
+          current_set: number
+          exercises: Json | null
+          id: string
+          is_active: boolean
+          last_updated_at: string
+          started_at: string
+          stopwatch_time: number
+          user_id: string
+        }
+        Insert: {
+          current_exercise_index?: number
+          current_set?: number
+          exercises?: Json | null
+          id?: string
+          is_active?: boolean
+          last_updated_at?: string
+          started_at?: string
+          stopwatch_time?: number
+          user_id: string
+        }
+        Update: {
+          current_exercise_index?: number
+          current_set?: number
+          exercises?: Json | null
+          id?: string
+          is_active?: boolean
+          last_updated_at?: string
+          started_at?: string
+          stopwatch_time?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

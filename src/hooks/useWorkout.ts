@@ -10,12 +10,18 @@ export const useWorkout = (exercises: Exercise[]) => {
     currentSet,
     showRestTimer,
     timerType,
+    workoutStartTime,
+    stopwatchTime,
+    isRestoringState,
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
     setCurrentSet,
     setShowRestTimer,
-    setTimerType
-  } = useWorkoutState();
+    setTimerType,
+    updateStopwatchTime,
+    startNewWorkout,
+    resetWorkoutState
+  } = useWorkoutState(exercises);
 
   const {
     startWorkout,
@@ -31,11 +37,13 @@ export const useWorkout = (exercises: Exercise[]) => {
       showRestTimer,
       timerType
     },
+    startNewWorkout,
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
     setCurrentSet,
     setShowRestTimer,
-    setTimerType
+    setTimerType,
+    resetWorkoutState
   });
 
   const currentExercise = isWorkoutStarted && exercises.length > 0 
@@ -49,6 +57,10 @@ export const useWorkout = (exercises: Exercise[]) => {
     showRestTimer,
     timerType,
     currentExercise,
+    workoutStartTime,
+    stopwatchTime,
+    isRestoringState,
+    updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,
     resetWorkout,

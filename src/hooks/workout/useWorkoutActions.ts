@@ -6,21 +6,25 @@ import { WorkoutState } from './useWorkoutState';
 interface WorkoutActionsProps {
   exercises: Exercise[];
   state: WorkoutState;
+  startNewWorkout: () => void;
   setIsWorkoutStarted: (value: boolean) => void;
   setCurrentExerciseIndex: (value: number) => void;
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
   setTimerType: (value: 'set' | 'exercise') => void;
+  resetWorkoutState: () => void;
 }
 
 export const useWorkoutActions = ({
   exercises,
   state,
+  startNewWorkout,
   setIsWorkoutStarted,
   setCurrentExerciseIndex, 
   setCurrentSet,
   setShowRestTimer,
-  setTimerType
+  setTimerType,
+  resetWorkoutState
 }: WorkoutActionsProps) => {
   const startWorkout = () => {
     if (exercises.length === 0) {
@@ -32,9 +36,10 @@ export const useWorkoutActions = ({
       return;
     }
     
-    setIsWorkoutStarted(true);
+    startNewWorkout(); // This now handles setting workout start time
     setCurrentExerciseIndex(0);
     setCurrentSet(0);
+    
     toast({
       title: "Workout started!",
       description: `Starting with ${exercises[0].name}`,
@@ -62,7 +67,8 @@ export const useWorkoutActions = ({
           setShowRestTimer(true);
         } else {
           // Workout complete
-          setIsWorkoutStarted(false);
+          resetWorkoutState(); // Now handles clearing local storage
+          
           toast({
             title: "Workout completed",
             description: "Great job! You've completed your workout.",
@@ -70,13 +76,6 @@ export const useWorkoutActions = ({
         }
       }
     }
-  };
-
-  const resetWorkout = () => {
-    setIsWorkoutStarted(false);
-    setCurrentExerciseIndex(0);
-    setCurrentSet(0);
-    setShowRestTimer(false);
   };
 
   const completeSet = () => {
@@ -87,7 +86,7 @@ export const useWorkoutActions = ({
   return {
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout,
+    resetWorkout: resetWorkoutState,
     completeSet
   };
 };

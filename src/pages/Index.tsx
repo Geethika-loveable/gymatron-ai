@@ -6,6 +6,7 @@ import WorkoutSetup from '@/components/WorkoutSetup';
 import ActiveWorkout from '@/components/ActiveWorkout';
 import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
+import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const { 
@@ -22,18 +23,37 @@ const Index = () => {
     showRestTimer,
     timerType,
     currentExercise,
+    workoutStartTime,
+    stopwatchTime,
+    isRestoringState,
+    updateStopwatchTime,
     startWorkout,
     handleRestTimerComplete,
     resetWorkout,
     completeSet
   } = useWorkout(exercises);
 
+  // Show toast if we're restoring a workout
+  React.useEffect(() => {
+    if (isWorkoutStarted && !isRestoringState) {
+      toast({
+        title: "Workout Restored",
+        description: "Your previous workout session has been restored",
+      });
+    }
+  }, [isWorkoutStarted, isRestoringState]);
+
   return (
     <div className="min-h-screen bg-background px-4 py-6 flex flex-col">
       <Header />
       
       <div className="container mx-auto flex-1 flex flex-col max-w-md">
-        <Stopwatch isWorkoutStarted={isWorkoutStarted} />
+        <Stopwatch 
+          isWorkoutStarted={isWorkoutStarted} 
+          initialTime={stopwatchTime}
+          onTimeUpdate={updateStopwatchTime}
+          isRestoringState={isRestoringState}
+        />
         
         {!isWorkoutStarted ? (
           <WorkoutSetup 
@@ -42,7 +62,7 @@ const Index = () => {
             onDeleteExercise={deleteExercise}
             onStartWorkout={startWorkout}
             isSignedIn={isSignedIn}
-            loading={loading}
+            loading={loading || isRestoringState}
           />
         ) : (
           <ActiveWorkout 

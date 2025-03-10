@@ -6,26 +6,64 @@ import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface StopwatchProps {
   isWorkoutStarted: boolean;
+  initialTime?: number;
+  onTimeUpdate?: (time: number) => void;
+  isRestoringState?: boolean;
 }
 
-const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
-  const [time, setTime] = useState<number>(0);
+const Stopwatch: React.FC<StopwatchProps> = ({ 
+  isWorkoutStarted, 
+  initialTime = 0,
+  onTimeUpdate,
+  isRestoringState = false
+}) => {
+  const [time, setTime] = useState<number>(initialTime);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const isInitializedRef = useRef<boolean>(false);
 
-  // Auto-start when workout begins
+  // Initialize or restore timer
   useEffect(() => {
-    if (isWorkoutStarted && !isRunning) {
+    if (isInitializedRef.current) return;
+    
+    if (initialTime > 0 && isWorkoutStarted && !isRestoringState) {
+      startTimeRef.current = Date.now() - initialTime;
+      setTime(initialTime);
       startTimer();
     }
-  }, [isWorkoutStarted]);
+    
+    isInitializedRef.current = true;
+  }, [initialTime, isWorkoutStarted, isRestoringState]);
+
+  // Auto-start when workout begins or when restored
+  useEffect(() => {
+    if (isWorkoutStarted && !isRunning && !isRestoringState) {
+      if (initialTime > 0) {
+        startTimeRef.current = Date.now() - initialTime;
+      } else {
+        startTimeRef.current = Date.now();
+      }
+      startTimer();
+    }
+  }, [isWorkoutStarted, isRunning, initialTime, isRestoringState]);
 
   const startTimer = () => {
+    if (intervalRef.current) return; // Prevent multiple intervals
+    
     setIsRunning(true);
-    const startTime = Date.now() - time;
+    
+    if (startTimeRef.current === 0) {
+      startTimeRef.current = Date.now() - time;
+    }
     
     intervalRef.current = window.setInterval(() => {
-      setTime(Date.now() - startTime);
+      const newTime = Date.now() - startTimeRef.current;
+      setTime(newTime);
+      
+      if (onTimeUpdate) {
+        onTimeUpdate(newTime);
+      }
     }, 10);
   };
 
@@ -40,6 +78,11 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
   const resetTimer = () => {
     pauseTimer();
     setTime(0);
+    startTimeRef.current = 0;
+    
+    if (onTimeUpdate) {
+      onTimeUpdate(0);
+    }
   };
 
   // Cleanup interval on unmount
@@ -47,6 +90,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, []);
@@ -65,6 +109,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
               variant="default" 
               size="sm" 
               className="rounded-full h-12 w-12 p-0 shadow-md"
+              disabled={isRestoringState}
             >
               <Play size={20} />
             </Button>
@@ -74,6 +119,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
               variant="outline" 
               size="sm" 
               className="rounded-full h-12 w-12 p-0 shadow-md"
+              disabled={isRestoringState}
             >
               <Pause size={20} />
             </Button>
@@ -84,6 +130,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ isWorkoutStarted }) => {
             variant="outline" 
             size="sm" 
             className="rounded-full h-12 w-12 p-0 shadow-md text-muted-foreground"
+            disabled={isRestoringState}
           >
             <RotateCcw size={20} />
           </Button>
