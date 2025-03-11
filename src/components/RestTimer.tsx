@@ -34,9 +34,7 @@ const RestTimer: React.FC<RestTimerProps> = ({
   const [debugInfo, setDebugInfo] = useState({
     timerId: timerId.current,
     startedAt: new Date().toISOString(),
-    renderCount: 0,
-    timerType: timerKey?.includes('exercise') ? 'exercise' : 'set',
-    duration
+    renderCount: 0
   });
   
   // Increment render count on each render
@@ -49,7 +47,7 @@ const RestTimer: React.FC<RestTimerProps> = ({
   
   // Handle timer setup and cleanup
   useEffect(() => {
-    console.log(`RestTimer: Component mounted with duration ${duration}s, timerId: ${timerId.current}, timerType: ${timerKey?.includes('exercise') ? 'exercise' : 'set'}`);
+    console.log(`RestTimer: Component mounted with duration ${duration}s, timerId: ${timerId.current}`);
     
     // Start the timer if not already running
     if (!timerStartedRef.current) {
@@ -86,11 +84,8 @@ const RestTimer: React.FC<RestTimerProps> = ({
   const debugDisplay = (
     <div className="text-xs text-gray-400 mt-2 text-center">
       <div>Timer ID: {debugInfo.timerId}</div>
-      <div>Timer Type: {debugInfo.timerType}</div>
-      <div>Duration: {debugInfo.duration}s</div>
       <div>Started: {debugInfo.startedAt}</div>
       <div>Render count: {debugInfo.renderCount}</div>
-      <div>Current Time Left: {timeLeft}s</div>
     </div>
   );
 
