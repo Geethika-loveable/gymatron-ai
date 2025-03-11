@@ -116,7 +116,7 @@ const Account = () => {
           
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              Gyma AI is a product of 
+              Gyma App is a product of 
             </span>
             <a 
               href="https://azynctra.com" 

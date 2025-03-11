@@ -65,12 +65,12 @@ const Header: React.FC = () => {
           >
             <img 
               src="/uploads/icon.png" 
-              alt="Gyma AI" 
+              alt="Gyma App" 
               className="w-full h-full object-cover"
             />
           </button>
           <h1 className="text-2xl font-semibold text-gym-800 border-border" onClick={handleIconClick}>
-            Gyma <span className="text-primary">AI</span>
+            Gyma <span className="text-primary">App</span>
           </h1>
         </div>
         

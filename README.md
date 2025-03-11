@@ -1,7 +1,7 @@
-# GYMA AI
+# GYMA App
 ## Save Up to 40% of Your Gym Time
 
-GYMA AI is a smart workout companion designed for busy people who want to maximize their exercise efficiency. By providing structured intervals, timely reminders, and focused workout management, GYMA AI helps you complete your routine faster without sacrificing results.
+GYMA App is a smart workout companion designed for busy people who want to maximize their exercise efficiency. By providing structured intervals, timely reminders, and focused workout management, GYMA App helps you complete your routine faster without sacrificing results.
 
 ## Time-Saving Benefits
 
@@ -28,7 +28,7 @@ GYMA AI is a smart workout companion designed for busy people who want to maximi
 
 ## Getting Started
 
-1. Open GYMA AI on your mobile device
+1. Open GYMA App on your mobile device
 2. Tap "Create Workout" to build your routine
 3. Add exercises and customize sets/reps
 4. Hit "Start Now" to begin your workout
@@ -37,7 +37,7 @@ GYMA AI is a smart workout companion designed for busy people who want to maximi
 
 ## Data & Privacy
 
-GYMA AI stores all your workout data locally on your device. We prioritize your privacy:
+GYMA App stores all your workout data locally on your device. We prioritize your privacy:
 - No account required to use basic features
 - No data uploaded to external servers
 - Your workout history stays on your device
@@ -52,9 +52,9 @@ For questions, feature requests, or technical support:
 
 © 2025 Azynctra. All Rights Reserved.
 
-GYMA AI is a proprietary software product of Azynctra. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
+GYMA App is a proprietary software product of Azynctra. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
-This software and its contents, including but not limited to text, graphics, logos, and code are protected by copyright laws and international treaties. The GYMA AI name, logo, and brand elements are trademarks of Azynctra.
+This software and its contents, including but not limited to text, graphics, logos, and code are protected by copyright laws and international treaties. The GYMA App name, logo, and brand elements are trademarks of Azynctra.
 
 No part of this software may be reproduced, transmitted, or used in any form or by any means, electronic or mechanical, without prior written permission from Azynctra.
 
@@ -65,4 +65,4 @@ Founder & CEO: Geethika Isuru
 
 ---
 
-*GYMA AI - Train Harder, Finish Faster*
+*GYMA App - Train Harder, Finish Faster*

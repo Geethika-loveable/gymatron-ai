@@ -24,7 +24,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">Information We Collect</h2>
               <p>
-                GYMA AI collects minimal information required to improve your workout experience. 
+                GYMA App collects minimal information required to improve your workout experience. 
                 This includes anonymous usage statistics, device information, and workout patterns.
               </p>
             </section>
@@ -58,7 +58,7 @@ const Privacy = () => {
               <h2 className="text-lg font-semibold text-foreground mb-2">Your Rights</h2>
               <p>
                 You can request access to your data, correction of inaccurate data, or deletion of your account 
-                and associated data at any time. Contact us at support@gymaai.com for assistance.
+                and associated data at any time. Contact us at gyma@azynctra.com for assistance. We do not ever sell any user data.
               </p>
             </section>
             
@@ -72,7 +72,7 @@ const Privacy = () => {
             
             <section className="pt-4">
               <p className="text-xs">
-                Last updated: June 2023
+                Last updated: 11 March 2025
               </p>
             </section>
           </div>
