@@ -111,7 +111,7 @@ const Account = () => {
       <footer className="mt-auto py-6 bg-background border-t">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-sm text-muted-foreground">
-            &copy; All rights Reserved 2025.
+            &copy; All rights Reserved 2025. | v0.2
           </div>
           
           <div className="flex items-center gap-2">
