@@ -14,6 +14,7 @@ interface ActiveWorkoutProps {
   onRestTimerComplete: () => void;
   onCompleteSet: () => void;
   onEndWorkout: () => void;
+  onOpenAuthModal: () => void; // Add missing prop
 }
 
 const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
@@ -24,7 +25,8 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   currentSet,
   onRestTimerComplete,
   onCompleteSet,
-  onEndWorkout
+  onEndWorkout,
+  onOpenAuthModal
 }) => {
   // Generate a unique key for the timer based on its type and current exercise/set
   const timerKey = `${timerType}-${currentExercise?.id || 'none'}-set-${currentSet}`;
@@ -67,7 +69,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
         currentExerciseId={currentExercise?.id}
         activeSet={currentSet}
         isSignedIn={true} // This doesn't matter during workout
-        onOpenAuthModal={() => {}} // Add this prop with an empty function since auth is not needed during workout
+        onOpenAuthModal={onOpenAuthModal} // Pass the prop to ExerciseList
       />
       
       <div className="mt-auto pb-6">

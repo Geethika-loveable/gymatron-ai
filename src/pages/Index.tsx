@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import WorkoutSetup from '@/components/WorkoutSetup';
 import ActiveWorkout from '@/components/ActiveWorkout';
+import WelcomePopup from '@/components/WelcomePopup';
 import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
 import { toast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ import AuthModal from '@/components/AuthModal';
 
 const Index = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   
   const { 
     exercises, 
@@ -37,6 +39,19 @@ const Index = () => {
     endWorkout,
     completeSet
   } = useWorkout(exercises);
+
+  // Check if this is first visit
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    if (!hasSeenWelcome) {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  const handleCloseWelcome = useCallback(() => {
+    setShowWelcome(false);
+    localStorage.setItem('hasSeenWelcome', 'true');
+  }, []);
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleAddExercise = useCallback((...args: Parameters<typeof addExercise>) => {
@@ -125,10 +140,17 @@ const Index = () => {
             onRestTimerComplete={handleRestComplete}
             onCompleteSet={handleCompleteSet}
             onEndWorkout={handleEndWorkout}
+            onOpenAuthModal={handleOpenAuthModal}
           />
         )}
       </div>
             
+      {/* Welcome Popup */}
+      <WelcomePopup 
+        isOpen={showWelcome} 
+        onClose={handleCloseWelcome}
+      />
+      
       {/* Global Auth Modal */}
       <AuthModal 
         isOpen={isAuthModalOpen} 
