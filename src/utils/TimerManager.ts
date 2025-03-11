@@ -36,7 +36,8 @@ class TimerManagerClass {
       const remaining = Math.max(0, endTime - currentTime);
       const elapsedMs = currentTime - startTime;
       const remainingSeconds = Math.ceil(remaining / 1000);
-      const progressValue = (remainingSeconds / durationSeconds) * 100;
+      const totalDuration = durationSeconds * 1000;
+      const progressValue = (remaining / totalDuration) * 100;
       
       // Call the tick callback with current values
       onTick(remainingSeconds, progressValue);

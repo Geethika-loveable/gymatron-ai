@@ -21,7 +21,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     currentExerciseIndex: 0,
     currentSet: 0,
     showRestTimer: false,
-    timerType: 'set' as const,
+    timerType: 'set' as 'set' | 'exercise',
     workoutStartTime: 0,
     stopwatchTime: 0,
   });

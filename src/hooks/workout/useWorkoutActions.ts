@@ -12,7 +12,7 @@ interface WorkoutActionsProps {
   setCurrentExerciseIndex: (value: number) => void;
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
-  setTimerType: (value: 'set' | 'exercise') => void; // Updated type definition
+  setTimerType: (value: 'set' | 'exercise') => void;
   resetWorkoutState: () => void;
 }
 
@@ -48,7 +48,7 @@ export const useWorkoutActions = ({
   };
 
   const handleRestTimerComplete = () => {
-    console.log("Rest timer complete handler called");
+    console.log("Rest timer complete handler called", state.timerType);
     
     // Stop any active timers
     const timerKey = `${state.timerType}-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
@@ -72,6 +72,14 @@ export const useWorkoutActions = ({
           // Start exercise rest timer
           setTimerType('exercise');
           setShowRestTimer(true);
+          
+          // Log that we're moving to exercise rest timer
+          console.log("Moving to exercise rest timer between exercises");
+          
+          toast({
+            title: "Exercise completed",
+            description: `Rest time before starting ${exercises[nextExerciseIndex].name}`,
+          });
         } else {
           // Workout complete
           endWorkout(); // Changed to use endWorkout instead of resetWorkoutState
@@ -82,6 +90,14 @@ export const useWorkoutActions = ({
           });
         }
       }
+    } else if (state.timerType === 'exercise') {
+      // Exercise rest timer completed, just continue with current exercise/set
+      console.log("Exercise rest timer completed, continuing with current exercise");
+      
+      toast({
+        title: "Rest complete",
+        description: `Starting ${exercises[state.currentExerciseIndex].name}`,
+      });
     }
   };
 
@@ -109,8 +125,14 @@ export const useWorkoutActions = ({
   };
 
   const completeSet = () => {
+    console.log("Completing set, starting set rest timer");
     setTimerType('set');
     setShowRestTimer(true);
+    
+    toast({
+      title: "Set completed",
+      description: "Taking a short rest before the next set",
+    });
   };
 
   return {
