@@ -9,10 +9,12 @@ import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
 import { toast } from "@/hooks/use-toast";
 import AuthModal from '@/components/AuthModal';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const Index = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const { trackEvent } = useAnalytics();
   
   const { 
     exercises, 
@@ -55,40 +57,61 @@ const Index = () => {
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleAddExercise = useCallback((...args: Parameters<typeof addExercise>) => {
+    trackEvent('exercise_added', { name: args[0].name, sets: args[0].sets, reps: args[0].reps });
     addExercise(...args);
-  }, [addExercise]);
+  }, [addExercise, trackEvent]);
   
   const handleDeleteExercise = useCallback((...args: Parameters<typeof deleteExercise>) => {
+    trackEvent('exercise_deleted', { exercise_id: args[0] });
     deleteExercise(...args);
-  }, [deleteExercise]);
+  }, [deleteExercise, trackEvent]);
   
   const handleStartWorkout = useCallback(() => {
+    trackEvent('workout_started', { 
+      exercise_count: exercises.length,
+      exercises: exercises.map(e => e.name)
+    });
     startWorkout();
-  }, [startWorkout]);
+  }, [startWorkout, exercises, trackEvent]);
   
   const handleRestComplete = useCallback(() => {
+    trackEvent('rest_completed', { 
+      timer_type: timerType,
+      current_exercise: currentExercise ? currentExercise.name : null,
+      current_set: currentSet
+    });
     handleRestTimerComplete();
-  }, [handleRestTimerComplete]);
+  }, [handleRestTimerComplete, timerType, currentExercise, currentSet, trackEvent]);
   
   const handleCompleteSet = useCallback(() => {
+    trackEvent('set_completed', { 
+      exercise_name: currentExercise ? currentExercise.name : null,
+      set: currentSet
+    });
     completeSet();
-  }, [completeSet]);
+  }, [completeSet, currentExercise, currentSet, trackEvent]);
   
   const handleEndWorkout = useCallback(() => {
+    trackEvent('workout_ended', { 
+      duration: stopwatchTime,
+      exercise_count: exercises.length
+    });
     endWorkout();
-  }, [endWorkout]);
+  }, [endWorkout, stopwatchTime, exercises.length, trackEvent]);
   
   const handleTimeUpdate = useCallback((time: number) => {
     updateStopwatchTime(time);
   }, [updateStopwatchTime]);
 
   const handleOpenAuthModal = useCallback(() => {
+    trackEvent('auth_modal_opened');
     setIsAuthModalOpen(true);
-  }, []);
+  }, [trackEvent]);
 
   const handleCloseAuthModal = useCallback(() => {
+    trackEvent('auth_modal_closed');
     setIsAuthModalOpen(false);
-  }, []);
+  }, [trackEvent]);
   
   // Restore saved exercises if needed
   useEffect(() => {
@@ -101,12 +124,13 @@ const Index = () => {
   // Show toast if we're restoring a workout
   useEffect(() => {
     if (isWorkoutStarted && !isRestoringState) {
+      trackEvent('workout_restored');
       toast({
         title: "Workout Restored",
         description: "Your previous workout session has been restored",
       });
     }
-  }, [isWorkoutStarted, isRestoringState]);
+  }, [isWorkoutStarted, isRestoringState, trackEvent]);
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 flex flex-col">

@@ -9,6 +9,108 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      analytics_events: {
+        Row: {
+          anonymous_id: string
+          created_at: string | null
+          event_name: string
+          event_properties: Json | null
+          id: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          anonymous_id: string
+          created_at?: string | null
+          event_name: string
+          event_properties?: Json | null
+          id?: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          anonymous_id?: string
+          created_at?: string | null
+          event_name?: string
+          event_properties?: Json | null
+          id?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      analytics_sessions: {
+        Row: {
+          anonymous_id: string
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string
+          duration: number | null
+          ended_at: string | null
+          id: string
+          ip_address: string | null
+          is_first_visit: boolean | null
+          os: string | null
+          session_id: string
+          started_at: string
+          user_id: string | null
+        }
+        Insert: {
+          anonymous_id: string
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type: string
+          duration?: number | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_first_visit?: boolean | null
+          os?: string | null
+          session_id: string
+          started_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          anonymous_id?: string
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string
+          duration?: number | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_first_visit?: boolean | null
+          os?: string | null
+          session_id?: string
+          started_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RocketIcon } from 'lucide-react';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface WelcomePopupProps {
   isOpen: boolean;
@@ -11,8 +12,23 @@ interface WelcomePopupProps {
 }
 
 const WelcomePopup: React.FC<WelcomePopupProps> = ({ isOpen, onClose }) => {
+  const { trackEvent, initializeSession } = useAnalytics();
+  
+  useEffect(() => {
+    if (isOpen) {
+      // Track that this is the user's first visit
+      initializeSession(true);
+      trackEvent('welcome_popup_shown');
+    }
+  }, [isOpen, trackEvent, initializeSession]);
+  
+  const handleClosePopup = () => {
+    trackEvent('welcome_popup_closed');
+    onClose();
+  };
+  
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClosePopup()}>
       <DialogContent className="sm:max-w-md px-6 py-8 rounded-xl">
         <div className="text-center space-y-4">
           <div className="flex justify-center mb-4">
@@ -47,7 +63,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ isOpen, onClose }) => {
         </div>
         
         <DialogFooter className="mt-6 sm:justify-center">
-          <Button onClick={onClose} className="w-full sm:w-auto gap-2">
+          <Button onClick={handleClosePopup} className="w-full sm:w-auto gap-2">
             <span>Let's Rock!</span>
           </Button>
         </DialogFooter>
