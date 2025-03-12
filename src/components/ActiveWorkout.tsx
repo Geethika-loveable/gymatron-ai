@@ -44,7 +44,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
         </div>
       ) : (
         <div className="sticky top-[120px] z-30 mb-6">
-          <div className="glass-panel p-6 mx-auto max-w-md w-full animate-fade-in flex items-center justify-center">
+          <div className="glass-panel p-6 mx-auto max-w-md w-full animate-fade-in">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-primary mb-1">
                 {currentExercise?.name}
@@ -52,12 +52,11 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
               <p className="text-2xl font-bold text-gym-800">
                 {currentExercise?.reps} Reps
               </p>
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-sm text-muted-foreground mt-2 mb-4">
                 Complete your reps and wait for the rest timer
               </p>
               
               <Button 
-                className="mt-4"
                 onClick={onCompleteSet}
               >
                 Complete Set

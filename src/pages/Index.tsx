@@ -120,16 +120,18 @@ const Index = () => {
       </div>
       
       <div className="container mx-auto flex-1 flex flex-col max-w-md pt-[64px]">
-        <div className="sticky top-[64px] z-40 bg-background/95 backdrop-blur-sm pt-4 px-4">
-          <Stopwatch 
-            isWorkoutStarted={isWorkoutStarted} 
-            initialTime={stopwatchTime}
-            onTimeUpdate={handleTimeUpdate}
-            isRestoringState={isRestoringState}
-          />
+        <div className="fixed top-[64px] left-0 right-0 z-40 bg-background/95 backdrop-blur-sm pt-4 px-4">
+          <div className="container mx-auto max-w-md">
+            <Stopwatch 
+              isWorkoutStarted={isWorkoutStarted} 
+              initialTime={stopwatchTime}
+              onTimeUpdate={handleTimeUpdate}
+              isRestoringState={isRestoringState}
+            />
+          </div>
         </div>
         
-        <div className="px-4 flex-1">
+        <div className="px-4 flex-1 pt-[140px]">
           {!isWorkoutStarted ? (
             <WorkoutSetup 
               exercises={exercises}

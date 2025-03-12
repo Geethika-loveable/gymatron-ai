@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { formatTime } from '../utils/timerUtils';
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface StopwatchProps {
   isWorkoutStarted: boolean;
@@ -19,7 +19,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({
 }) => {
   const [time, setTime] = useState<number>(initialTime);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [showControls, setShowControls] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const isInitializedRef = useRef<boolean>(false);
@@ -116,60 +115,12 @@ const Stopwatch: React.FC<StopwatchProps> = ({
     };
   }, []);
 
-  const toggleControls = () => {
-    setShowControls(prev => !prev);
-  };
-
   return (
     <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-fade-in">
       <div className="text-center">
-        <div className="text-5xl font-semibold tracking-tight timer-text mb-4 text-gym-900">
+        <div className="text-5xl font-semibold tracking-tight timer-text mb-2 text-gym-900">
           {formatTime(time)}
         </div>
-        
-        <button 
-          onClick={toggleControls}
-          className="text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1 mx-auto mb-2"
-        >
-          <span className="text-xs">Controls</span>
-          {showControls ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-        
-        {showControls && (
-          <div className="flex justify-center gap-3">
-            {!isRunning ? (
-              <Button 
-                onClick={startTimer} 
-                variant="default" 
-                size="sm" 
-                className="rounded-full h-12 w-12 p-0 shadow-md"
-                disabled={isRestoringState}
-              >
-                <Play size={20} />
-              </Button>
-            ) : (
-              <Button 
-                onClick={pauseTimer} 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full h-12 w-12 p-0 shadow-md"
-                disabled={isRestoringState}
-              >
-                <Pause size={20} />
-              </Button>
-            )}
-            
-            <Button 
-              onClick={resetTimer} 
-              variant="outline" 
-              size="sm" 
-              className="rounded-full h-12 w-12 p-0 shadow-md text-muted-foreground"
-              disabled={isRestoringState}
-            >
-              <RotateCcw size={20} />
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
