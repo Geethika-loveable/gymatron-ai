@@ -21,7 +21,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     currentExerciseIndex: 0,
     currentSet: 0,
     showRestTimer: false,
-    timerType: 'set' as const,
+    timerType: 'set' as 'set' | 'exercise',
     workoutStartTime: 0,
     stopwatchTime: 0,
   });
@@ -199,13 +199,13 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       setIsWorkoutStarted(false);
       setCurrentExerciseIndex(0);
       setCurrentSet(0);
-      safeSetTimerType('set');
+      setTimerType('set');
       setWorkoutStartTime(0);
       setStopwatchTime(0);
       setSavedExercises([]);
       clearWorkoutState();
     }, 50);
-  }, [clearWorkoutState, safeSetShowRestTimer, safeSetTimerType]);
+  }, [clearWorkoutState, safeSetShowRestTimer]);
 
   return {
     isWorkoutStarted,
