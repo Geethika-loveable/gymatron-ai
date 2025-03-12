@@ -26,4 +26,5 @@ export type WorkoutStateSetter = {
   setShowRestTimer: (value: boolean) => void;
   setTimerType: (value: 'set' | 'exercise') => void;
   updateStopwatchTime: (time: number) => void;
+  setWorkoutStartTime: (value: number) => void;
 };

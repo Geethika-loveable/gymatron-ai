@@ -1,22 +1,23 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
-import { WorkoutStateWithTime } from './types';
+import { LocalWorkoutState, WorkoutStateWithTime } from './types';
 import { useWorkoutStateSetters } from './useWorkoutStateSetters';
 import { useWorkoutPersistence } from './useWorkoutPersistence';
 
 export type { WorkoutState, WorkoutStateWithTime } from './types';
 
 export const useWorkoutState = (exercises: Exercise[]) => {
-  const stateRef = useRef<WorkoutStateWithTime & { exercises: Exercise[] }>({
+  const stateRef = useRef<LocalWorkoutState>({
     isWorkoutStarted: false,
     currentExerciseIndex: 0,
     currentSet: 0,
     showRestTimer: false,
-    timerType: 'set' as 'set' | 'exercise',
+    timerType: 'set',
     workoutStartTime: 0,
     stopwatchTime: 0,
-    exercises: []
+    exercises: [],
+    lastSavedAt: 0
   });
   
   const {
@@ -39,6 +40,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     setTimerType,
     setIsRestoringState,
     setSavedExercises,
+    setWorkoutStartTime,
+    setStopwatchTime,
     updateStopwatchTime,
     startNewWorkout
   } = useWorkoutStateSetters();
@@ -61,7 +64,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       timerType,
       workoutStartTime,
       stopwatchTime,
-      exercises: savedExercises
+      exercises: savedExercises,
+      lastSavedAt: Date.now()
     };
     
     console.log("Workout state updated:", {

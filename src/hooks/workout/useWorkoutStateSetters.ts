@@ -53,6 +53,7 @@ export const useWorkoutStateSetters = () => {
     setIsRestoringState,
     setSavedExercises,
     setWorkoutStartTime,
+    setStopwatchTime,
     updateStopwatchTime,
     startNewWorkout
   };
