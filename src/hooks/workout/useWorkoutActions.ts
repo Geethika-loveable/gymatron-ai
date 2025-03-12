@@ -12,7 +12,7 @@ interface WorkoutActionsProps {
   setCurrentExerciseIndex: (value: number) => void;
   setCurrentSet: (value: number) => void;
   setShowRestTimer: (value: boolean) => void;
-  setTimerType: (value: 'set' | 'exercise') => void; // Updated type definition
+  setTimerType: (value: 'set' | 'exercise') => void; 
   resetWorkoutState: () => void;
 }
 
@@ -47,56 +47,99 @@ export const useWorkoutActions = ({
     });
   };
 
+  // This function handles transitions between sets and exercises
   const handleRestTimerComplete = () => {
-    console.log("Rest timer complete handler called");
+    console.log("Rest timer complete handler called", {
+      currentType: state.timerType,
+      currentExercise: state.currentExerciseIndex,
+      currentSet: state.currentSet
+    });
     
     // Stop any active timers
     const timerKey = `${state.timerType}-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
     TimerManager.stopTimer(timerKey);
     
+    // First hide the timer
     setShowRestTimer(false);
     
-    if (state.timerType === 'set') {
+    // Small delay to ensure state is updated correctly before further changes
+    setTimeout(() => {
+      if (state.timerType === 'set') {
+        handleSetTimerComplete();
+      } else if (state.timerType === 'exercise') {
+        // Exercise rest is complete, no need for additional state changes
+        // as the timer is already hidden
+        console.log("Exercise rest complete, ready for the next exercise");
+      }
+    }, 50);
+  };
+  
+  // Extracted to a separate function to improve readability
+  const handleSetTimerComplete = () => {
+    const currentExercise = exercises[state.currentExerciseIndex];
+    if (!currentExercise) {
+      console.error("Current exercise not found");
+      return;
+    }
+    
+    // Check if there are more sets for this exercise
+    const nextSet = state.currentSet + 1;
+    
+    if (nextSet < currentExercise.sets) {
       // Move to next set
-      const nextSet = state.currentSet + 1;
-      if (nextSet < exercises[state.currentExerciseIndex].sets) {
-        setCurrentSet(nextSet);
-      } else {
-        // All sets completed for this exercise
-        const nextExerciseIndex = state.currentExerciseIndex + 1;
+      console.log(`Moving to next set: ${nextSet}`);
+      setCurrentSet(nextSet);
+    } else {
+      // All sets for this exercise are complete
+      const nextExerciseIndex = state.currentExerciseIndex + 1;
+      
+      if (nextExerciseIndex < exercises.length) {
+        // Move to next exercise with a small delay to prevent state conflicts
+        console.log(`Moving to next exercise: ${nextExerciseIndex}`);
         
-        if (nextExerciseIndex < exercises.length) {
-          // Move to next exercise
-          setCurrentExerciseIndex(nextExerciseIndex);
-          setCurrentSet(0);
-          // Start exercise rest timer
+        // Update both exercise index and set in sequence with delays
+        setCurrentExerciseIndex(nextExerciseIndex);
+        setCurrentSet(0);
+        
+        // Add a small delay before showing the exercise rest timer
+        setTimeout(() => {
+          console.log("Starting exercise rest timer");
           setTimerType('exercise');
           setShowRestTimer(true);
-        } else {
-          // Workout complete
-          endWorkout(); // Changed to use endWorkout instead of resetWorkoutState
-          
-          toast({
-            title: "Workout completed",
-            description: "Great job! You've completed your workout.",
-          });
-        }
+        }, 100);
+      } else {
+        // Workout complete
+        console.log("Workout complete!");
+        endWorkout();
+        
+        toast({
+          title: "Workout completed",
+          description: "Great job! You've completed your workout.",
+        });
       }
     }
   };
 
   // Method to end workout without resetting the stopwatch
   const endWorkout = () => {
-    // Stop all running timers
-    const timerKey = `${state.timerType}-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
-    TimerManager.stopTimer(timerKey);
+    console.log("Ending workout, stopping all timers");
     
-    setIsWorkoutStarted(false);
-    setCurrentExerciseIndex(0);
-    setCurrentSet(0);
+    // Stop all potential timers
+    const setTimerKey = `set-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
+    const exerciseTimerKey = `exercise-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
+    
+    TimerManager.stopTimer(setTimerKey);
+    TimerManager.stopTimer(exerciseTimerKey);
+    
+    // Update state in sequence with small delays to prevent conflicts
     setShowRestTimer(false);
-    setTimerType('set');
-    // Note: We're not resetting workoutStartTime or stopwatchTime here
+    
+    setTimeout(() => {
+      setIsWorkoutStarted(false);
+      setCurrentExerciseIndex(0);
+      setCurrentSet(0);
+      setTimerType('set');
+    }, 50);
     
     // Clear the localStorage state
     clearWorkoutState();
@@ -109,6 +152,7 @@ export const useWorkoutActions = ({
   };
 
   const completeSet = () => {
+    console.log("Set completed, starting rest timer");
     setTimerType('set');
     setShowRestTimer(true);
   };
