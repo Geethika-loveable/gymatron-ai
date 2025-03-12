@@ -1,7 +1,7 @@
 
 import { toast } from "@/components/ui/use-toast";
 import { Exercise } from '@/components/ExerciseForm';
-import { WorkoutState } from './useWorkoutState';
+import { WorkoutState } from './types';
 import { TimerManager } from '@/utils/TimerManager';
 
 interface WorkoutActionsProps {
@@ -59,7 +59,7 @@ export const useWorkoutActions = ({
     const timerKey = `${state.timerType}-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
     TimerManager.stopTimer(timerKey);
     
-    // First hide the timer
+    // First hide the timer with a small delay to ensure proper unmounting
     setShowRestTimer(false);
     
     // Small delay to ensure state is updated correctly before further changes

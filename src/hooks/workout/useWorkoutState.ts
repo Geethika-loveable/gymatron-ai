@@ -1,22 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+
+import { useEffect, useCallback, useRef } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
-import { useLocalWorkoutPersistence } from './useLocalWorkoutPersistence';
+import { WorkoutStateWithTime } from './types';
+import { useWorkoutStateSetters } from './useWorkoutStateSetters';
+import { useWorkoutPersistence } from './useWorkoutPersistence';
 
-export interface WorkoutState {
-  isWorkoutStarted: boolean;
-  currentExerciseIndex: number;
-  currentSet: number;
-  showRestTimer: boolean;
-  timerType: 'set' | 'exercise';
-}
-
-export interface WorkoutStateWithTime extends WorkoutState {
-  workoutStartTime: number;
-  stopwatchTime: number;
-}
+export type { WorkoutState, WorkoutStateWithTime } from './types';
 
 export const useWorkoutState = (exercises: Exercise[]) => {
-  const stateRef = useRef({
+  const stateRef = useRef<WorkoutStateWithTime & { exercises: Exercise[] }>({
     isWorkoutStarted: false,
     currentExerciseIndex: 0,
     currentSet: 0,
@@ -24,28 +16,42 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     timerType: 'set' as 'set' | 'exercise',
     workoutStartTime: 0,
     stopwatchTime: 0,
+    exercises: []
   });
   
-  const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-  const [currentSet, setCurrentSet] = useState(0);
-  const [showRestTimer, setShowRestTimer] = useState(false);
-  const [timerType, setTimerType] = useState<'set' | 'exercise'>('set');
-  const [workoutStartTime, setWorkoutStartTime] = useState(0);
-  const [stopwatchTime, setStopwatchTime] = useState(0);
-  const [isRestoringState, setIsRestoringState] = useState(true);
-  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
+  const {
+    // States
+    isWorkoutStarted,
+    currentExerciseIndex,
+    currentSet,
+    showRestTimer,
+    timerType,
+    workoutStartTime,
+    stopwatchTime,
+    isRestoringState,
+    savedExercises,
+    
+    // Setters
+    setIsWorkoutStarted,
+    setCurrentExerciseIndex,
+    setCurrentSet,
+    setShowRestTimer,
+    setTimerType,
+    setIsRestoringState,
+    setSavedExercises,
+    updateStopwatchTime,
+    startNewWorkout
+  } = useWorkoutStateSetters();
   
-  const { 
-    saveWorkoutState, 
-    loadWorkoutState, 
+  const {
+    throttledSave,
+    saveState,
+    loadWorkoutState,
     clearWorkoutState,
-    isInitialized 
-  } = useLocalWorkoutPersistence();
+    isInitialized
+  } = useWorkoutPersistence(stateRef, isRestoringState, exercises);
 
-  const lastSaveTimeRef = useRef<number>(0);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+  // Update ref to current state for persistence
   useEffect(() => {
     stateRef.current = {
       isWorkoutStarted,
@@ -55,6 +61,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       timerType,
       workoutStartTime,
       stopwatchTime,
+      exercises: savedExercises
     };
     
     console.log("Workout state updated:", {
@@ -73,51 +80,10 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     timerType,
     workoutStartTime,
     stopwatchTime,
+    savedExercises
   ]);
 
-  const safeSetShowRestTimer = useCallback((value: boolean) => {
-    console.log(`Setting showRestTimer to ${value}`);
-    setShowRestTimer(value);
-  }, []);
-  
-  const safeSetTimerType = useCallback((value: 'set' | 'exercise') => {
-    console.log(`Setting timerType to ${value}`);
-    setTimerType(value);
-  }, []);
-
-  const throttledSave = useCallback(() => {
-    const now = Date.now();
-    const timeSinceLastSave = now - lastSaveTimeRef.current;
-    
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = null;
-    }
-    
-    if (timeSinceLastSave < 2000) {
-      saveTimeoutRef.current = setTimeout(() => {
-        saveState();
-        saveTimeoutRef.current = null;
-      }, 2000 - timeSinceLastSave);
-      return;
-    }
-    
-    saveState();
-  }, []);
-
-  const saveState = useCallback(() => {
-    if (!isInitialized || isRestoringState || !stateRef.current.isWorkoutStarted) return;
-    
-    const stateToSave = {
-      ...stateRef.current,
-      exercises: exercises.length > 0 ? exercises : savedExercises,
-      lastSavedAt: Date.now()
-    };
-    
-    saveWorkoutState(stateToSave);
-    lastSaveTimeRef.current = Date.now();
-  }, [isInitialized, isRestoringState, exercises, savedExercises, saveWorkoutState]);
-
+  // Save state when workout is active and state changes
   useEffect(() => {
     if (!isInitialized || isRestoringState) return;
     
@@ -134,6 +100,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     throttledSave
   ]);
 
+  // Set up periodic save during workout
   useEffect(() => {
     if (!isWorkoutStarted || !isInitialized || isRestoringState) return;
     
@@ -149,6 +116,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     saveState
   ]);
 
+  // Load saved state on init
   useEffect(() => {
     if (!isInitialized) return;
     
@@ -158,20 +126,23 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       if (savedState && savedState.isWorkoutStarted) {
         console.log('Restoring workout state:', savedState);
         
-        setWorkoutStartTime(savedState.workoutStartTime);
-        setStopwatchTime(savedState.stopwatchTime);
-        setCurrentExerciseIndex(savedState.currentExerciseIndex);
-        setCurrentSet(savedState.currentSet);
-        safeSetTimerType(savedState.timerType);
-        
-        setTimeout(() => {
-          safeSetShowRestTimer(savedState.showRestTimer);
+        // Sequential state updates with small delays to prevent race conditions
+        const loadSavedState = async () => {
+          if (savedState.exercises && savedState.exercises.length > 0) {
+            setSavedExercises(savedState.exercises);
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+          
+          setCurrentExerciseIndex(savedState.currentExerciseIndex);
+          setCurrentSet(savedState.currentSet);
+          setTimerType(savedState.timerType);
+          
+          await new Promise(resolve => setTimeout(resolve, 50));
+          setShowRestTimer(savedState.showRestTimer);
           setIsWorkoutStarted(savedState.isWorkoutStarted);
-        }, 100);
+        };
         
-        if (savedState.exercises && savedState.exercises.length > 0) {
-          setSavedExercises(savedState.exercises);
-        }
+        loadSavedState();
       }
     } catch (error) {
       console.error('Error restoring workout state:', error);
@@ -180,20 +151,20 @@ export const useWorkoutState = (exercises: Exercise[]) => {
         setIsRestoringState(false);
       }, 200);
     }
-  }, [isInitialized, loadWorkoutState, safeSetShowRestTimer, safeSetTimerType]);
-
-  const updateStopwatchTime = useCallback((time: number) => {
-    setStopwatchTime(time);
-  }, []);
-
-  const startNewWorkout = useCallback(() => {
-    setWorkoutStartTime(Date.now());
-    setStopwatchTime(0);
-    setIsWorkoutStarted(true);
-  }, []);
+  }, [
+    isInitialized, 
+    loadWorkoutState, 
+    setCurrentExerciseIndex, 
+    setCurrentSet, 
+    setIsRestoringState, 
+    setIsWorkoutStarted, 
+    setSavedExercises, 
+    setShowRestTimer, 
+    setTimerType
+  ]);
 
   const resetWorkoutState = useCallback(() => {
-    safeSetShowRestTimer(false);
+    setShowRestTimer(false);
     
     setTimeout(() => {
       setIsWorkoutStarted(false);
@@ -205,7 +176,17 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       setSavedExercises([]);
       clearWorkoutState();
     }, 50);
-  }, [clearWorkoutState, safeSetShowRestTimer]);
+  }, [
+    clearWorkoutState, 
+    setCurrentExerciseIndex, 
+    setCurrentSet, 
+    setIsWorkoutStarted, 
+    setSavedExercises, 
+    setShowRestTimer, 
+    setStopwatchTime, 
+    setTimerType, 
+    setWorkoutStartTime
+  ]);
 
   return {
     isWorkoutStarted,
@@ -220,8 +201,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     setIsWorkoutStarted,
     setCurrentExerciseIndex,
     setCurrentSet,
-    setShowRestTimer: safeSetShowRestTimer,
-    setTimerType: safeSetTimerType,
+    setShowRestTimer,
+    setTimerType,
     updateStopwatchTime,
     startNewWorkout,
     resetWorkoutState
