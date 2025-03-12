@@ -56,7 +56,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="py-4 px-4 w-full">
+    <header className="py-2 px-4 w-full bg-background/95 backdrop-blur-sm z-50 border-b border-border/10">
       <div className="container mx-auto flex items-center justify-center relative">
         <div className="flex items-center gap-2">
           <button 

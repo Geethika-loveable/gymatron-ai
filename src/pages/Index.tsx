@@ -112,61 +112,48 @@ const Index = () => {
     trackEvent('auth_modal_closed');
     setIsAuthModalOpen(false);
   }, [trackEvent]);
-  
-  // Restore saved exercises if needed
-  useEffect(() => {
-    if (isWorkoutStarted && savedExercises && savedExercises.length > 0 && exercises.length === 0) {
-      console.log('Restoring saved exercises:', savedExercises);
-      setExercises(savedExercises);
-    }
-  }, [isWorkoutStarted, exercises.length, savedExercises, setExercises]);
-
-  // Show toast if we're restoring a workout
-  useEffect(() => {
-    if (isWorkoutStarted && !isRestoringState) {
-      trackEvent('workout_restored');
-      toast({
-        title: "Workout Restored",
-        description: "Your previous workout session has been restored",
-      });
-    }
-  }, [isWorkoutStarted, isRestoringState, trackEvent]);
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 flex flex-col">
-      <Header />
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Header />
+      </div>
       
-      <div className="container mx-auto flex-1 flex flex-col max-w-md">
-        <Stopwatch 
-          isWorkoutStarted={isWorkoutStarted} 
-          initialTime={stopwatchTime}
-          onTimeUpdate={handleTimeUpdate}
-          isRestoringState={isRestoringState}
-        />
+      <div className="container mx-auto flex-1 flex flex-col max-w-md pt-[64px]">
+        <div className="sticky top-[64px] z-40 bg-background/95 backdrop-blur-sm pt-4 px-4">
+          <Stopwatch 
+            isWorkoutStarted={isWorkoutStarted} 
+            initialTime={stopwatchTime}
+            onTimeUpdate={handleTimeUpdate}
+            isRestoringState={isRestoringState}
+          />
+        </div>
         
-        {!isWorkoutStarted ? (
-          <WorkoutSetup 
-            exercises={exercises}
-            onAddExercise={handleAddExercise}
-            onDeleteExercise={handleDeleteExercise}
-            onStartWorkout={handleStartWorkout}
-            isSignedIn={isSignedIn}
-            loading={loading || isRestoringState}
-            onOpenAuthModal={handleOpenAuthModal}
-          />
-        ) : (
-          <ActiveWorkout 
-            exercises={exercises.length > 0 ? exercises : savedExercises}
-            showRestTimer={showRestTimer}
-            timerType={timerType}
-            currentExercise={currentExercise}
-            currentSet={currentSet}
-            onRestTimerComplete={handleRestComplete}
-            onCompleteSet={handleCompleteSet}
-            onEndWorkout={handleEndWorkout}
-            onOpenAuthModal={handleOpenAuthModal}
-          />
-        )}
+        <div className="px-4 flex-1">
+          {!isWorkoutStarted ? (
+            <WorkoutSetup 
+              exercises={exercises}
+              onAddExercise={handleAddExercise}
+              onDeleteExercise={handleDeleteExercise}
+              onStartWorkout={handleStartWorkout}
+              isSignedIn={isSignedIn}
+              loading={loading || isRestoringState}
+              onOpenAuthModal={handleOpenAuthModal}
+            />
+          ) : (
+            <ActiveWorkout 
+              exercises={exercises.length > 0 ? exercises : savedExercises}
+              showRestTimer={showRestTimer}
+              timerType={timerType}
+              currentExercise={currentExercise}
+              currentSet={currentSet}
+              onRestTimerComplete={handleRestComplete}
+              onCompleteSet={handleCompleteSet}
+              onEndWorkout={handleEndWorkout}
+              onOpenAuthModal={handleOpenAuthModal}
+            />
+          )}
+        </div>
       </div>
             
       {/* Welcome Popup */}
