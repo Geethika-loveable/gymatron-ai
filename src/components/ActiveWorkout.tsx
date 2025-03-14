@@ -64,7 +64,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
         )}
       </div>
       
-      <div className="pt-4 w-full">
+      <div className="w-full">
         <ExerciseList 
           exercises={exercises} 
           onDeleteExercise={() => {}} // Disable deletion during workout
