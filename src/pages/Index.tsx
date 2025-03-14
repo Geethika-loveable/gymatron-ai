@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
@@ -42,7 +41,6 @@ const Index = () => {
     completeSet
   } = useWorkout(exercises);
 
-  // Check if this is first visit
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
     if (!hasSeenWelcome) {
@@ -55,7 +53,6 @@ const Index = () => {
     localStorage.setItem('hasSeenWelcome', 'true');
   }, []);
 
-  // Memoize handlers to prevent unnecessary re-renders
   const handleAddExercise = useCallback((...args: Parameters<typeof addExercise>) => {
     trackEvent('exercise_added', { name: args[0].name, sets: args[0].sets, reps: args[0].reps });
     addExercise(...args);
@@ -116,7 +113,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="fixed top-0 left-0 right-0 z-50">
-        <Header />
+        <Header onOpenAuthModal={handleOpenAuthModal} />
       </div>
       
       <div className="container mx-auto flex-1 flex flex-col max-w-md pt-[64px]">
@@ -158,13 +155,11 @@ const Index = () => {
         </div>
       </div>
             
-      {/* Welcome Popup */}
       <WelcomePopup 
         isOpen={showWelcome} 
         onClose={handleCloseWelcome}
       />
       
-      {/* Global Auth Modal */}
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={handleCloseAuthModal} 

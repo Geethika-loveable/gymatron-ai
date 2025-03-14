@@ -4,10 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { User } from '@supabase/supabase-js';
-import AuthModal from '@/components/AuthModal';
 
-const Header: React.FC = () => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+// Remove the import of AuthModal as it's now managed globally from Index.tsx
+// import AuthModal from '@/components/AuthModal';
+
+interface HeaderProps {
+  onOpenAuthModal: () => void;  // Add this prop to open the global auth modal
+}
+
+const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -51,7 +56,8 @@ const Header: React.FC = () => {
     if (user) {
       navigate('/account');
     } else {
-      setIsAuthModalOpen(true);
+      // Use the prop to open the global auth modal
+      onOpenAuthModal();
     }
   };
 
@@ -86,10 +92,7 @@ const Header: React.FC = () => {
         )}
       </div>
       
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
+      {/* Remove the local AuthModal component */}
     </header>
   );
 };
