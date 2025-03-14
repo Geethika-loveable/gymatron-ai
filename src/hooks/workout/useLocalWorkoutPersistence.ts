@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
-import { WorkoutState } from './useWorkoutState';
+import { WorkoutState } from './types';
 
 // Define the structure of our locally stored workout state
 export interface LocalWorkoutState extends WorkoutState {
@@ -28,8 +28,8 @@ export const useLocalWorkoutPersistence = () => {
         lastSavedAt: Date.now()
       };
       
+      console.log('Saving state to localStorage with stopwatch time:', stateToSave.stopwatchTime);
       localStorage.setItem(STORAGE_KEYS.WORKOUT_STATE, JSON.stringify(stateToSave));
-      console.log('Workout state saved to localStorage:', stateToSave);
     } catch (error) {
       console.error('Error saving workout state:', error);
     }
@@ -45,12 +45,13 @@ export const useLocalWorkoutPersistence = () => {
       }
       
       const parsedState = JSON.parse(savedState) as LocalWorkoutState;
-      console.log('Loaded workout state from localStorage:', parsedState);
+      console.log('Loaded workout state from localStorage with stopwatch time:', parsedState.stopwatchTime);
       
       // Validate the parsed state - basic structure check
       if (!parsedState || 
           typeof parsedState.isWorkoutStarted !== 'boolean' ||
-          !Array.isArray(parsedState.exercises)) {
+          !Array.isArray(parsedState.exercises) ||
+          typeof parsedState.stopwatchTime !== 'number') {
         console.error('Invalid stored workout state, clearing');
         localStorage.removeItem(STORAGE_KEYS.WORKOUT_STATE);
         return null;
@@ -79,8 +80,7 @@ export const useLocalWorkoutPersistence = () => {
   // Set up listeners for page lifecycle events
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // This is just a safeguard - we'll primarily rely on
-      // explicit saves during workout state changes
+      // This is just a safeguard for additional persistence
       console.log('Window beforeunload event triggered');
     };
 

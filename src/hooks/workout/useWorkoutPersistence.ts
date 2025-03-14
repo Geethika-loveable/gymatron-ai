@@ -19,7 +19,7 @@ export const useWorkoutPersistence = (
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const saveState = useCallback(() => {
-    if (!isInitialized || isRestoringState || !stateRef.current.isWorkoutStarted) return;
+    if (!isInitialized || isRestoringState) return;
     
     const stateToSave = {
       ...stateRef.current,
@@ -27,6 +27,7 @@ export const useWorkoutPersistence = (
       lastSavedAt: Date.now()
     };
     
+    console.log('Saving state with stopwatch time:', stateToSave.stopwatchTime);
     saveWorkoutState(stateToSave);
     lastSaveTimeRef.current = Date.now();
   }, [isInitialized, isRestoringState, exercises, saveWorkoutState, stateRef]);

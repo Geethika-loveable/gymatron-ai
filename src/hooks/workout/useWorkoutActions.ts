@@ -37,7 +37,8 @@ export const useWorkoutActions = ({
       return;
     }
     
-    startNewWorkout(); // This now handles setting workout start time
+    // This will reset the stopwatch to 0 and start a new workout
+    startNewWorkout();
     setCurrentExerciseIndex(0);
     setCurrentSet(0);
     
@@ -122,7 +123,7 @@ export const useWorkoutActions = ({
 
   // Method to end workout without resetting the stopwatch
   const endWorkout = () => {
-    console.log("Ending workout, stopping all timers");
+    console.log("Ending workout, stopping all timers but preserving stopwatch time");
     
     // Stop all potential timers
     const setTimerKey = `set-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
@@ -145,12 +146,6 @@ export const useWorkoutActions = ({
     
     // Note: We're NOT clearing localStorage here
     // This allows the stopwatch time to be preserved
-  };
-
-  // Import the clearWorkoutState function directly to avoid circular imports
-  const clearWorkoutState = () => {
-    localStorage.removeItem('workout_state_v1');
-    console.log('Workout state cleared from localStorage');
   };
 
   const completeSet = () => {

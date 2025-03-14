@@ -31,7 +31,7 @@ export const useWorkoutStateSetters = () => {
     const now = Date.now();
     console.log(`Starting new workout at ${now}`);
     setWorkoutStartTime(now);
-    setStopwatchTime(0);
+    setStopwatchTime(0); // Reset stopwatch time for a new workout
     setIsWorkoutStarted(true);
   }, []);
 

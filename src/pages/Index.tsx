@@ -98,7 +98,6 @@ const Index = () => {
   }, [endWorkout, stopwatchTime, exercises.length, trackEvent]);
   
   const handleTimeUpdate = useCallback((time: number) => {
-    console.log(`Index received time update: ${time}`);
     updateStopwatchTime(time);
   }, [updateStopwatchTime]);
 
@@ -111,6 +110,10 @@ const Index = () => {
     trackEvent('auth_modal_closed');
     setIsAuthModalOpen(false);
   }, [trackEvent]);
+
+  useEffect(() => {
+    console.log(`Index received stopwatch time: ${stopwatchTime}, isRestoringState: ${isRestoringState}`);
+  }, [stopwatchTime, isRestoringState]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
