@@ -1,9 +1,10 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Exercise } from '@/components/ExerciseForm';
 import { WorkoutState } from './useWorkoutState';
 
 // Define the structure of our locally stored workout state
-interface LocalWorkoutState extends WorkoutState {
+export interface LocalWorkoutState extends WorkoutState {
   exercises: Exercise[];
   workoutStartTime: number; // timestamp in ms
   stopwatchTime: number; // elapsed time in ms

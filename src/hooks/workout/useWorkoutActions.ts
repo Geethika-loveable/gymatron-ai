@@ -135,14 +135,16 @@ export const useWorkoutActions = ({
     setShowRestTimer(false);
     
     setTimeout(() => {
+      // Important: We don't reset the stopwatch time here
+      // We just mark the workout as not started
       setIsWorkoutStarted(false);
       setCurrentExerciseIndex(0);
       setCurrentSet(0);
       setTimerType('set');
     }, 50);
     
-    // Clear the localStorage state
-    clearWorkoutState();
+    // Note: We're NOT clearing localStorage here
+    // This allows the stopwatch time to be preserved
   };
 
   // Import the clearWorkoutState function directly to avoid circular imports
