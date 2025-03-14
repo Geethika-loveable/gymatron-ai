@@ -7,11 +7,13 @@ import { useToast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import AuthModal from '@/components/AuthModal';
 
 const Account = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ name: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -52,10 +54,18 @@ const Account = () => {
     navigate('/');
   };
 
+  const handleOpenAuthModal = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const handleCloseAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header onOpenAuthModal={handleOpenAuthModal} />
         <div className="container mx-auto px-4 py-6 flex items-center justify-center h-64">
           <p>Loading...</p>
         </div>
@@ -65,7 +75,7 @@ const Account = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header onOpenAuthModal={handleOpenAuthModal} />
       
       <div className="container mx-auto px-4 py-6 max-w-md flex-1">
         <div className="flex items-center mb-4">
@@ -133,6 +143,11 @@ const Account = () => {
           </div>
         </div>
       </footer>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={handleCloseAuthModal} 
+      />
     </div>
   );
 };
