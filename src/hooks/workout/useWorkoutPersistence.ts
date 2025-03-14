@@ -1,7 +1,9 @@
 
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import { LocalWorkoutState } from './types';
 import { useLocalWorkoutPersistence } from './useLocalWorkoutPersistence';
+import { useSaveThrottling } from './useSaveThrottling';
+import { useStateSaving } from './useStateSaving';
 
 export const useWorkoutPersistence = (
   stateRef: React.MutableRefObject<LocalWorkoutState>,
@@ -15,63 +17,19 @@ export const useWorkoutPersistence = (
     isInitialized 
   } = useLocalWorkoutPersistence();
 
-  const lastSaveTimeRef = useRef<number>(0);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const saveState = useCallback(() => {
-    if (!isInitialized || isRestoringState) return;
-    
-    const stateToSave = {
-      ...stateRef.current,
-      exercises: exercises.length > 0 ? exercises : stateRef.current.exercises,
-      lastSavedAt: Date.now()
-    };
-    
-    console.log('Saving state with stopwatch time:', stateToSave.stopwatchTime);
-    saveWorkoutState(stateToSave);
-    lastSaveTimeRef.current = Date.now();
-  }, [isInitialized, isRestoringState, exercises, saveWorkoutState, stateRef]);
+  // Create a specific state saving function
+  const { saveState } = useStateSaving({
+    stateRef,
+    exercises,
+    saveWorkoutState
+  });
 
-  const throttledSave = useCallback(() => {
-    const now = Date.now();
-    const timeSinceLastSave = now - lastSaveTimeRef.current;
-    
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = null;
-    }
-    
-    if (timeSinceLastSave < 2000) {
-      saveTimeoutRef.current = setTimeout(() => {
-        saveState();
-        saveTimeoutRef.current = null;
-      }, 2000 - timeSinceLastSave);
-      return;
-    }
-    
-    saveState();
-  }, [saveState]);
-
-  // Force save ensures state is saved immediately, bypassing throttling
-  const forceSave = useCallback(() => {
-    if (!isInitialized) return;
-    
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = null;
-    }
-    
-    // Always save, even if we're in the middle of restoring
-    const stateToSave = {
-      ...stateRef.current,
-      exercises: exercises.length > 0 ? exercises : stateRef.current.exercises,
-      lastSavedAt: Date.now()
-    };
-    
-    console.log('Force saving state with stopwatch time:', stateToSave.stopwatchTime);
-    saveWorkoutState(stateToSave);
-    lastSaveTimeRef.current = Date.now();
-  }, [isInitialized, exercises, saveWorkoutState, stateRef]);
+  // Use the throttling hook
+  const { throttledSave, forceSave } = useSaveThrottling({
+    saveCallback: saveState,
+    isInitialized,
+    isRestoringState
+  });
 
   return {
     throttledSave,
