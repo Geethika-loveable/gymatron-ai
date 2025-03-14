@@ -73,7 +73,7 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
   };
 
   return (
-    <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up">
+    <div className="glass-panel p-6 w-full mb-6 animate-slide-up">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gym-800">
           Your Exercises

@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { formatTime } from '../utils/timerUtils';
-import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface StopwatchProps {
   isWorkoutStarted: boolean;
@@ -116,7 +114,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   }, []);
 
   return (
-    <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-fade-in">
+    <div className="glass-panel p-6 w-full mb-6 animate-fade-in">
       <div className="text-center">
         <div className="text-5xl font-semibold tracking-tight timer-text mb-2 text-gym-900">
           {formatTime(time)}

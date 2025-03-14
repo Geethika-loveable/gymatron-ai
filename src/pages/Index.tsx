@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
@@ -116,9 +117,9 @@ const Index = () => {
         <Header onOpenAuthModal={handleOpenAuthModal} />
       </div>
       
-      <div className="container mx-auto flex-1 flex flex-col max-w-md pt-[64px]">
-        <div className="fixed top-[64px] left-0 right-0 z-40 bg-background/95 backdrop-blur-sm pt-4 px-4">
-          <div className="container mx-auto max-w-md">
+      <div className="container mx-auto flex-1 flex flex-col pt-[64px]">
+        <div className="fixed top-[64px] left-0 right-0 z-40 bg-background/95 backdrop-blur-sm pt-4">
+          <div className="container mx-auto px-4 max-w-md">
             <Stopwatch 
               isWorkoutStarted={isWorkoutStarted} 
               initialTime={stopwatchTime}
@@ -128,7 +129,7 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="px-4 flex-1 pt-[140px]">
+        <div className="px-4 flex-1 pt-[140px] max-w-md mx-auto w-full">
           {!isWorkoutStarted ? (
             <WorkoutSetup 
               exercises={exercises}

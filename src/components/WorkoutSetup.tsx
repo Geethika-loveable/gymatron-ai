@@ -34,11 +34,11 @@ const WorkoutSetup: React.FC<WorkoutSetupProps> = ({
         onDeleteExercise={onDeleteExercise}
         isSignedIn={isSignedIn}
         loading={loading}
-        onOpenAuthModal={onOpenAuthModal} // Pass the prop to ExerciseList
+        onOpenAuthModal={onOpenAuthModal} 
       />
       
       {exercises.length > 0 && (
-        <div className="mt-auto pb-6">
+        <div className="mt-auto pb-6 w-full">
           <Button 
             onClick={onStartWorkout} 
             className="w-full h-14 text-lg"

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +59,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ onAddExercise }) => {
   };
 
   return (
-    <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-slide-up">
+    <div className="glass-panel p-6 w-full mb-6 animate-slide-up">
       <h2 className="text-lg font-semibold mb-4 text-gym-800">Add Exercise</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">

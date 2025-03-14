@@ -34,7 +34,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   return (
     <>
       {showRestTimer ? (
-        <div className="sticky top-[120px] z-30 mb-6">
+        <div className="sticky top-[120px] z-30 mb-6 w-full">
           <RestTimer 
             duration={timerType === 'set' ? 30 : 60} 
             onComplete={onRestTimerComplete} 
@@ -43,8 +43,8 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
           />
         </div>
       ) : (
-        <div className="sticky top-[120px] z-30 mb-6">
-          <div className="glass-panel p-6 mx-auto max-w-md w-full animate-fade-in">
+        <div className="sticky top-[120px] z-30 mb-6 w-full">
+          <div className="glass-panel p-6 w-full animate-fade-in">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-primary mb-1">
                 {currentExercise?.name}
@@ -66,7 +66,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
         </div>
       )}
       
-      <div className="pt-4">
+      <div className="pt-4 w-full">
         <ExerciseList 
           exercises={exercises} 
           onDeleteExercise={() => {}} // Disable deletion during workout
@@ -77,7 +77,7 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
         />
       </div>
       
-      <div className="mt-auto pb-6">
+      <div className="mt-auto pb-6 w-full">
         <Button 
           variant="outline"
           onClick={onEndWorkout} 
