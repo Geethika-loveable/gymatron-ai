@@ -33,17 +33,15 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
   
   return (
     <>
-      {showRestTimer ? (
-        <div className="sticky top-[120px] z-30 mb-6 w-full">
+      <div className="sticky top-[120px] z-30 mb-6 w-full">
+        {showRestTimer ? (
           <RestTimer 
             duration={timerType === 'set' ? 30 : 60} 
             onComplete={onRestTimerComplete} 
             label={timerType === 'set' ? 'Rest Between Sets' : 'Rest Between Exercises'} 
             timerKey={timerKey}
           />
-        </div>
-      ) : (
-        <div className="sticky top-[120px] z-30 mb-6 w-full">
+        ) : (
           <div className="glass-panel p-6 w-full animate-fade-in">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-primary mb-1">
@@ -63,8 +61,8 @@ const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
       
       <div className="pt-4 w-full">
         <ExerciseList 

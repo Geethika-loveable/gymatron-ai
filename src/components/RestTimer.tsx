@@ -108,7 +108,7 @@ const RestTimer: React.FC<RestTimerProps> = ({
   );
 
   return (
-    <div className="glass-panel p-6 mx-auto max-w-md w-full mb-6 animate-fade-in">
+    <div className="glass-panel p-6 mx-auto max-w-md w-full animate-fade-in">
       <h3 className="text-center font-medium text-gym-600 mb-2">
         {label}
       </h3>
