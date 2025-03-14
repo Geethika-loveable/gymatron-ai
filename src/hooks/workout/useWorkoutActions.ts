@@ -27,6 +27,7 @@ export const useWorkoutActions = ({
   setTimerType,
   resetWorkoutState
 }: WorkoutActionsProps) => {
+  // Start a brand new workout (resets stopwatch)
   const startWorkout = () => {
     if (exercises.length === 0) {
       toast({
@@ -69,7 +70,6 @@ export const useWorkoutActions = ({
         handleSetTimerComplete();
       } else if (state.timerType === 'exercise') {
         // Exercise rest is complete, no need for additional state changes
-        // as the timer is already hidden
         console.log("Exercise rest complete, ready for the next exercise");
       }
     }, 50);
@@ -144,8 +144,20 @@ export const useWorkoutActions = ({
       setTimerType('set');
     }, 50);
     
-    // Note: We're NOT clearing localStorage here
-    // This allows the stopwatch time to be preserved
+    // The state will be persisted by the persistence hook
+    toast({
+      title: "Workout paused",
+      description: "Your progress has been saved.",
+    });
+  };
+
+  const resetWorkout = () => {
+    resetWorkoutState(); // This will reset all state including stopwatch
+    
+    toast({
+      title: "Workout reset",
+      description: "Starting fresh with a clean slate.",
+    });
   };
 
   const completeSet = () => {
@@ -157,7 +169,7 @@ export const useWorkoutActions = ({
   return {
     startWorkout,
     handleRestTimerComplete,
-    resetWorkout: resetWorkoutState,
+    resetWorkout,
     completeSet,
     endWorkout
   };

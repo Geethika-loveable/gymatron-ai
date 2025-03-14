@@ -13,7 +13,7 @@ export interface LocalWorkoutState extends WorkoutState {
 
 // Storage keys
 const STORAGE_KEYS = {
-  WORKOUT_STATE: 'workout_state_v1',
+  WORKOUT_STATE: 'workout_state_v2', // Updated version to avoid conflicts
 };
 
 export const useLocalWorkoutPersistence = () => {
@@ -75,22 +75,6 @@ export const useLocalWorkoutPersistence = () => {
   // Initialize by checking for existing state
   useEffect(() => {
     setIsInitialized(true);
-  }, []);
-
-  // Set up listeners for page lifecycle events
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      // This is just a safeguard for additional persistence
-      console.log('Window beforeunload event triggered');
-    };
-
-    // Add event listeners
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    // Clean up event listeners
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
   }, []);
 
   return {

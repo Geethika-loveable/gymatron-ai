@@ -52,9 +52,31 @@ export const useWorkoutPersistence = (
     saveState();
   }, [saveState]);
 
+  // Force save ensures state is saved immediately, bypassing throttling
+  const forceSave = useCallback(() => {
+    if (!isInitialized) return;
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    
+    // Always save, even if we're in the middle of restoring
+    const stateToSave = {
+      ...stateRef.current,
+      exercises: exercises.length > 0 ? exercises : stateRef.current.exercises,
+      lastSavedAt: Date.now()
+    };
+    
+    console.log('Force saving state with stopwatch time:', stateToSave.stopwatchTime);
+    saveWorkoutState(stateToSave);
+    lastSaveTimeRef.current = Date.now();
+  }, [isInitialized, exercises, saveWorkoutState, stateRef]);
+
   return {
     throttledSave,
     saveState,
+    forceSave,
     loadWorkoutState,
     clearWorkoutState,
     isInitialized

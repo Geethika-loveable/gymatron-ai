@@ -19,75 +19,63 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const intervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
-  const isInitializedRef = useRef<boolean>(false);
-  const previousIsWorkoutStartedRef = useRef<boolean>(false);
+  const initialTimeRef = useRef<number>(initialTime);
+  const previousIsWorkoutStartedRef = useRef<boolean>(isWorkoutStarted);
 
-  // Initialize or restore timer
+  // Initialize timer with initialTime on mount and when initialTime changes
   useEffect(() => {
-    if (isInitializedRef.current) return;
+    console.log(`Initializing stopwatch with initialTime=${initialTime}, isWorkoutStarted=${isWorkoutStarted}`);
     
-    console.log(`Initializing stopwatch with initialTime=${initialTime}, isWorkoutStarted=${isWorkoutStarted}, isRestoringState=${isRestoringState}`);
-    
-    // Set the time to initialTime regardless of workout state
+    // Set the time state and ref to initialTime
     setTime(initialTime);
+    initialTimeRef.current = initialTime;
     
-    // Calculate the correct start time to maintain stopwatch continuity
+    // If stopwatch has time and we're restoring state, set the correct start time
     if (initialTime > 0) {
       startTimeRef.current = Date.now() - initialTime;
+      console.log(`Restored startTimeRef to ${startTimeRef.current}`);
     }
-    
-    // Only start the timer if workout is active
-    if (isWorkoutStarted) {
-      startTimer();
-    }
-    
-    isInitializedRef.current = true;
-  }, [initialTime, isWorkoutStarted, isRestoringState]);
+  }, [initialTime]);
 
-  // Track workout started changes
+  // Handle workout state changes
   useEffect(() => {
-    console.log(`Workout started changed: ${isWorkoutStarted}, Previous: ${previousIsWorkoutStartedRef.current}, Time: ${time}`);
+    console.log(`Workout state changed to: ${isWorkoutStarted}, previous: ${previousIsWorkoutStartedRef.current}, time: ${time}`);
     
-    // If workout is newly started (transitioning from false to true)
+    // If workout was just started (and was not active before)
     if (isWorkoutStarted && !previousIsWorkoutStartedRef.current) {
-      // Reset the timer and start it from 0 only if this is a brand new workout
-      if (time === 0 || !isRestoringState) {
-        console.log("Starting a new workout - resetting and starting timer");
+      // Only reset timer if this is a brand new workout (not restoring)
+      if (!isRestoringState && initialTimeRef.current === 0) {
+        console.log("Starting fresh workout - resetting timer");
         resetTimer();
         startTimeRef.current = Date.now();
-        startTimer();
       } else {
-        console.log("Continuing existing workout - resuming timer");
-        startTimer();
+        console.log(`Continuing workout - using existing time: ${time}ms`);
+        // Ensure start time is correctly set based on current time value
+        startTimeRef.current = Date.now() - time;
       }
+      startTimer();
     } 
-    // If workout has ended (transitioning from true to false)
+    // If workout was just stopped
     else if (!isWorkoutStarted && previousIsWorkoutStartedRef.current) {
-      console.log("Workout ended - pausing timer but preserving time");
-      // Stop the timer but don't reset it
+      console.log("Workout stopped - pausing timer");
       pauseTimer();
     }
 
-    // Update reference for next check
     previousIsWorkoutStartedRef.current = isWorkoutStarted;
-  }, [isWorkoutStarted, isRestoringState, time]);
+  }, [isWorkoutStarted, time, isRestoringState]);
 
-  // Auto-start when workout begins or when restored state becomes active
+  // Auto-start when workout is active
   useEffect(() => {
     if (isWorkoutStarted && !isRunning) {
-      console.log(`Auto-starting timer, initialTime=${initialTime}, isRunning=${isRunning}`);
+      console.log(`Auto-starting timer, time=${time}, isRunning=${isRunning}`);
       
       if (startTimeRef.current === 0) {
-        if (initialTime > 0) {
-          startTimeRef.current = Date.now() - initialTime;
-        } else {
-          startTimeRef.current = Date.now();
-        }
+        startTimeRef.current = Date.now() - time;
       }
       
       startTimer();
     }
-  }, [isWorkoutStarted, isRunning, initialTime]);
+  }, [isWorkoutStarted, isRunning, time]);
 
   const startTimer = () => {
     if (intervalRef.current) {
@@ -141,11 +129,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({
       }
     };
   }, []);
-
-  // Debug timer state changes
-  useEffect(() => {
-    console.log(`Stopwatch time updated: ${formatTime(time)}, isRunning: ${isRunning}`);
-  }, [time, isRunning]);
 
   return (
     <div className="glass-panel p-6 w-full mb-6 animate-fade-in">

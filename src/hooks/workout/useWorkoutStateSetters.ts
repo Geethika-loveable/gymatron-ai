@@ -22,11 +22,13 @@ export const useWorkoutStateSetters = () => {
     setTimerType(value);
   }, []);
 
+  // This function is called from the Stopwatch component
   const updateStopwatchTime = useCallback((time: number) => {
     console.log(`Updating stopwatch time to ${time}`);
     setStopwatchTime(time);
   }, []);
 
+  // This is called only when starting a brand new workout, not when resuming
   const startNewWorkout = useCallback(() => {
     const now = Date.now();
     console.log(`Starting new workout at ${now}`);

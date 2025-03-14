@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
@@ -98,8 +97,11 @@ const Index = () => {
   }, [endWorkout, stopwatchTime, exercises.length, trackEvent]);
   
   const handleTimeUpdate = useCallback((time: number) => {
-    updateStopwatchTime(time);
-  }, [updateStopwatchTime]);
+    if (Math.abs(stopwatchTime - time) > 50) {
+      console.log(`Index updating stopwatch time: ${time}`);
+      updateStopwatchTime(time);
+    }
+  }, [updateStopwatchTime, stopwatchTime]);
 
   const handleOpenAuthModal = useCallback(() => {
     trackEvent('auth_modal_opened');
@@ -112,7 +114,7 @@ const Index = () => {
   }, [trackEvent]);
 
   useEffect(() => {
-    console.log(`Index received stopwatch time: ${stopwatchTime}, isRestoringState: ${isRestoringState}`);
+    console.log(`Index component rendered with stopwatch time: ${stopwatchTime}, isRestoringState: ${isRestoringState}`);
   }, [stopwatchTime, isRestoringState]);
 
   return (

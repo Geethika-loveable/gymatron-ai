@@ -49,12 +49,13 @@ export const useWorkoutState = (exercises: Exercise[]) => {
   const {
     throttledSave,
     saveState,
+    forceSave,
     loadWorkoutState,
     clearWorkoutState,
     isInitialized
   } = useWorkoutPersistence(stateRef, isRestoringState, exercises);
 
-  // Update ref to current state for persistence
+  // Always update our ref to current state for persistence
   useEffect(() => {
     stateRef.current = {
       isWorkoutStarted,
@@ -89,29 +90,36 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     savedExercises
   ]);
 
-  // Save state when workout is active and state changes
+  // Save state when workout state changes
   useEffect(() => {
     if (!isInitialized || isRestoringState) return;
     
-    // Save state regardless of workout state to ensure stopwatch time is preserved
+    // Always save state to ensure stopwatch time is preserved
     throttledSave();
   }, [
     isInitialized,
-    isRestoringState,
-    isWorkoutStarted, 
+    isRestoringState, 
     currentExerciseIndex, 
     currentSet, 
     showRestTimer,
-    stopwatchTime, 
+    timerType,
     throttledSave
   ]);
+
+  // Special effect to save stopwatch time updates less frequently
+  useEffect(() => {
+    if (!isInitialized || isRestoringState) return;
+    
+    // Use throttled save for stopwatch updates
+    throttledSave();
+  }, [isInitialized, isRestoringState, stopwatchTime, throttledSave]);
 
   // Set up periodic save during workout
   useEffect(() => {
     if (!isInitialized || isRestoringState) return;
     
     const saveInterval = setInterval(() => {
-      // Always save state periodically if we have any data to preserve
+      // Always save state periodically to ensure data isn't lost
       saveState();
     }, 10000);
     
@@ -121,6 +129,14 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     isRestoringState,
     saveState
   ]);
+
+  // Special handler for workout state changes, force save
+  useEffect(() => {
+    if (!isInitialized || isRestoringState) return;
+    
+    // Force save when workout state changes
+    forceSave();
+  }, [isInitialized, isRestoringState, isWorkoutStarted, forceSave]);
 
   // Load saved state on init
   useEffect(() => {
@@ -133,22 +149,25 @@ export const useWorkoutState = (exercises: Exercise[]) => {
         console.log('Restoring workout state with stopwatch time:', savedState.stopwatchTime);
         setIsRestoringState(true);
         
-        // Sequential state updates with small delays to prevent race conditions
+        // Load state in correct order to prevent conflicts
         const loadSavedState = async () => {
           // First set the stopwatch time
           if (typeof savedState.stopwatchTime === 'number') {
             setStopwatchTime(savedState.stopwatchTime);
-            console.log(`Restoring stopwatch time: ${savedState.stopwatchTime}ms`);
+            console.log(`Set stopwatch time to: ${savedState.stopwatchTime}ms`);
           }
           
           await new Promise(resolve => setTimeout(resolve, 50));
           
+          // Then load exercises if needed
           if (savedState.exercises && savedState.exercises.length > 0) {
             setSavedExercises(savedState.exercises);
+            console.log('Loaded saved exercises:', savedState.exercises.length);
           }
           
           await new Promise(resolve => setTimeout(resolve, 50));
           
+          // Set current position values
           setCurrentExerciseIndex(savedState.currentExerciseIndex);
           setCurrentSet(savedState.currentSet);
           setTimerType(savedState.timerType);
@@ -157,20 +176,24 @@ export const useWorkoutState = (exercises: Exercise[]) => {
             setWorkoutStartTime(savedState.workoutStartTime);
           }
           
-          // Only restore workout active state if workout was active
+          // Finally set the workout active state if it was active
+          await new Promise(resolve => setTimeout(resolve, 50));
+          setShowRestTimer(savedState.showRestTimer);
+          
+          // This should be last as it triggers the most side effects
           if (savedState.isWorkoutStarted) {
-            await new Promise(resolve => setTimeout(resolve, 50));
-            setShowRestTimer(savedState.showRestTimer);
             setIsWorkoutStarted(savedState.isWorkoutStarted);
           }
           
-          // Mark restoration as complete
+          // Mark restoration as complete after a small delay
           await new Promise(resolve => setTimeout(resolve, 100));
           setIsRestoringState(false);
+          console.log('State restoration complete');
         };
         
         loadSavedState();
       } else {
+        console.log('No saved state found');
         setIsRestoringState(false);
       }
     } catch (error) {
@@ -191,11 +214,14 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     setTimerType
   ]);
 
+  // Handle workout state reset
   const resetWorkoutState = useCallback(() => {
-    // First set all state variables that don't cause renders
+    console.log('Resetting workout state completely');
+    
+    // Order matters here - first disable UI elements
     setShowRestTimer(false);
     
-    // Then reset the rest with a small delay
+    // Then reset state values with a small delay
     setTimeout(() => {
       setIsWorkoutStarted(false);
       setCurrentExerciseIndex(0);
@@ -204,6 +230,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       setWorkoutStartTime(0);
       setStopwatchTime(0);
       setSavedExercises([]);
+      
+      // Clear saved state
       clearWorkoutState();
     }, 50);
   }, [
