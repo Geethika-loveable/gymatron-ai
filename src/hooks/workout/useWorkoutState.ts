@@ -64,7 +64,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       timerType,
       workoutStartTime,
       stopwatchTime,
-      exercises: savedExercises,
+      exercises: exercises.length > 0 ? exercises : savedExercises,
       lastSavedAt: Date.now()
     };
     
@@ -73,7 +73,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
       currentExerciseIndex, 
       currentSet,
       showRestTimer,
-      timerType
+      timerType,
+      stopwatchTime
     });
     
   }, [
@@ -84,6 +85,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     timerType,
     workoutStartTime,
     stopwatchTime,
+    exercises,
     savedExercises
   ]);
 
@@ -101,6 +103,7 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     currentExerciseIndex, 
     currentSet, 
     showRestTimer,
+    stopwatchTime, // Added stopwatchTime as a dependency
     throttledSave
   ]);
 
@@ -141,6 +144,15 @@ export const useWorkoutState = (exercises: Exercise[]) => {
           setCurrentSet(savedState.currentSet);
           setTimerType(savedState.timerType);
           
+          // Set the correct stopwatch time
+          if (savedState.stopwatchTime) {
+            setStopwatchTime(savedState.stopwatchTime);
+          }
+          
+          if (savedState.workoutStartTime) {
+            setWorkoutStartTime(savedState.workoutStartTime);
+          }
+          
           await new Promise(resolve => setTimeout(resolve, 50));
           setShowRestTimer(savedState.showRestTimer);
           setIsWorkoutStarted(savedState.isWorkoutStarted);
@@ -164,6 +176,8 @@ export const useWorkoutState = (exercises: Exercise[]) => {
     setIsWorkoutStarted, 
     setSavedExercises, 
     setShowRestTimer, 
+    setStopwatchTime,
+    setWorkoutStartTime,
     setTimerType
   ]);
 

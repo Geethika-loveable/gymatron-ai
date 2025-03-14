@@ -37,6 +37,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({
 
   // Track workout started changes
   useEffect(() => {
+    console.log(`Workout started: ${isWorkoutStarted}, Previous: ${previousIsWorkoutStartedRef.current}`);
+    
     // If workout is newly started (transitioning from false to true)
     if (isWorkoutStarted && !previousIsWorkoutStartedRef.current) {
       // Reset the timer and start it from 0
@@ -67,7 +69,9 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   }, [isWorkoutStarted, isRunning, initialTime, isRestoringState]);
 
   const startTimer = () => {
-    if (intervalRef.current) return; // Prevent multiple intervals
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     
     setIsRunning(true);
     
@@ -83,9 +87,12 @@ const Stopwatch: React.FC<StopwatchProps> = ({
         onTimeUpdate(newTime);
       }
     }, 10);
+    
+    console.log("Stopwatch started with interval ID:", intervalRef.current);
   };
 
   const pauseTimer = () => {
+    console.log("Pausing timer, interval ID:", intervalRef.current);
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -106,12 +113,18 @@ const Stopwatch: React.FC<StopwatchProps> = ({
   // Cleanup interval on unmount
   useEffect(() => {
     return () => {
+      console.log("Stopwatch unmounting, cleaning up interval");
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
   }, []);
+
+  // Debug timer state changes
+  useEffect(() => {
+    console.log(`Stopwatch time updated: ${formatTime(time)}, isRunning: ${isRunning}`);
+  }, [time, isRunning]);
 
   return (
     <div className="glass-panel p-6 w-full mb-6 animate-fade-in">

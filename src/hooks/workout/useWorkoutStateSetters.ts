@@ -23,11 +23,14 @@ export const useWorkoutStateSetters = () => {
   }, []);
 
   const updateStopwatchTime = useCallback((time: number) => {
+    console.log(`Updating stopwatch time to ${time}`);
     setStopwatchTime(time);
   }, []);
 
   const startNewWorkout = useCallback(() => {
-    setWorkoutStartTime(Date.now());
+    const now = Date.now();
+    console.log(`Starting new workout at ${now}`);
+    setWorkoutStartTime(now);
     setStopwatchTime(0);
     setIsWorkoutStarted(true);
   }, []);

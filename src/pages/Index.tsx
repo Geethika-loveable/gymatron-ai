@@ -98,6 +98,7 @@ const Index = () => {
   }, [endWorkout, stopwatchTime, exercises.length, trackEvent]);
   
   const handleTimeUpdate = useCallback((time: number) => {
+    console.log(`Index received time update: ${time}`);
     updateStopwatchTime(time);
   }, [updateStopwatchTime]);
 
