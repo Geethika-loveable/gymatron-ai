@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Stopwatch from '@/components/Stopwatch';
 import WorkoutSetup from '@/components/WorkoutSetup';
 import ActiveWorkout from '@/components/ActiveWorkout';
 import WelcomePopup from '@/components/WelcomePopup';
+import LoadingScreen from '@/components/LoadingScreen';
 import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
 import { toast } from "@/hooks/use-toast";
@@ -40,6 +42,9 @@ const Index = () => {
     endWorkout,
     completeSet
   } = useWorkout(exercises);
+
+  // Combined loading state for the loading screen
+  const isLoading = loading || isRestoringState;
 
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
@@ -119,6 +124,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <LoadingScreen isLoading={isLoading} />
+      
       <div className="fixed top-0 left-0 right-0 z-50">
         <Header onOpenAuthModal={handleOpenAuthModal} />
       </div>
