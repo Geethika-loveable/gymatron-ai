@@ -5,14 +5,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { User } from '@supabase/supabase-js';
 
-// Remove the import of AuthModal as it's now managed globally from Index.tsx
-// import AuthModal from '@/components/AuthModal';
-
+// Adding title, showBack, and rightSection props to the interface
 interface HeaderProps {
-  onOpenAuthModal: () => void;  // Add this prop to open the global auth modal
+  onOpenAuthModal: () => void;
+  title?: string;
+  showBack?: boolean;
+  rightSection?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  onOpenAuthModal, 
+  title = 'GYMA',
+  showBack = false,
+  rightSection 
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -56,7 +62,6 @@ const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
     if (user) {
       navigate('/account');
     } else {
-      // Use the prop to open the global auth modal
       onOpenAuthModal();
     }
   };
@@ -76,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
             />
           </button>
           <h1 className="text-2xl font-semibold text-gym-800 border-border" onClick={handleIconClick}>
-            Gyma <span className="text-primary">App</span>
+            {title} <span className="text-primary">App</span>
           </h1>
         </div>
         
@@ -90,9 +95,13 @@ const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
             </button>
           </div>
         )}
+
+        {rightSection && (
+          <div className="absolute right-0">
+            {rightSection}
+          </div>
+        )}
       </div>
-      
-      {/* Remove the local AuthModal component */}
     </header>
   );
 };

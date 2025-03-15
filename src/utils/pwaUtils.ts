@@ -7,11 +7,11 @@ export const isPwaInstallable = (): boolean => {
   const isInstallPromptSupported = 'onbeforeinstallprompt' in window;
   
   // iOS devices can't show install prompt, but can add to home screen manually
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
   
   // Check if already installed (display-mode: standalone)
   const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || 
-                            (navigator.standalone === true);
+                            ((navigator as any).standalone === true);
   
   return isInstallPromptSupported && !isInStandaloneMode && !isIOS;
 };
@@ -42,8 +42,8 @@ export const setupPwaInstall = (
     deferredPrompt = null;
     
     // Track successful installation
-    if (window.analytics) {
-      window.analytics.trackEvent('pwa_installed');
+    if ((window as any).analytics) {
+      (window as any).analytics.trackEvent('pwa_installed');
     }
     
     console.log('PWA was installed');
