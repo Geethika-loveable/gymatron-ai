@@ -10,6 +10,7 @@ import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { analyticsService } from "./services/analyticsService";
+import PwaUpdateNotification from "./components/PwaUpdateNotification";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <PwaUpdateNotification />
       </TooltipProvider>
     </QueryClientProvider>
   );
