@@ -6,6 +6,7 @@ import WorkoutSetup from '@/components/WorkoutSetup';
 import ActiveWorkout from '@/components/ActiveWorkout';
 import WelcomePopup from '@/components/WelcomePopup';
 import LoadingScreen from '@/components/LoadingScreen';
+import WorkoutCompleteNotification from '@/components/WorkoutCompleteNotification';
 import { useExerciseData } from '@/hooks/useExerciseData';
 import { useWorkout } from '@/hooks/useWorkout';
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 const Index = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showWorkoutComplete, setShowWorkoutComplete] = useState(false);
   const { trackEvent } = useAnalytics();
   
   const { 
@@ -99,6 +101,7 @@ const Index = () => {
       exercise_count: exercises.length
     });
     endWorkout();
+    setShowWorkoutComplete(true);
   }, [endWorkout, stopwatchTime, exercises.length, trackEvent]);
   
   const handleTimeUpdate = useCallback((time: number) => {
@@ -116,6 +119,11 @@ const Index = () => {
   const handleCloseAuthModal = useCallback(() => {
     trackEvent('auth_modal_closed');
     setIsAuthModalOpen(false);
+  }, [trackEvent]);
+  
+  const handleCloseWorkoutComplete = useCallback(() => {
+    trackEvent('workout_complete_notification_closed');
+    setShowWorkoutComplete(false);
   }, [trackEvent]);
 
   useEffect(() => {
@@ -177,7 +185,13 @@ const Index = () => {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={handleCloseAuthModal} 
-      />  
+      />
+      
+      <WorkoutCompleteNotification
+        isVisible={showWorkoutComplete}
+        duration={stopwatchTime}
+        onClose={handleCloseWorkoutComplete}
+      />
     </div>
   );
 };

@@ -113,10 +113,11 @@ export const useWorkoutActions = ({
         console.log("Workout complete!");
         endWorkout();
         
-        toast({
-          title: "Workout completed",
-          description: "Great job! You've completed your workout.",
-        });
+        // We'll use the custom notification instead of this toast
+        // toast({
+        //   title: "Workout completed",
+        //   description: "Great job! You've completed your workout.",
+        // });
       }
     }
   };
