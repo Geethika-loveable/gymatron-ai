@@ -10,9 +10,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isLoading }) => {
   if (!isLoading) return null;
   
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-primary/5 to-background">
-      <div className="flex flex-col items-center max-w-xs text-center p-6">
-        <div className="h-28 w-28 relative mb-6 overflow-hidden rounded-2xl shadow-lg border border-primary/20">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background">
+      {/* Full overlay with solid background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-background/95"></div>
+      
+      <div className="relative z-10 flex flex-col items-center max-w-xs text-center p-6">
+        <div className="h-28 w-28 relative mb-6 overflow-hidden rounded-2xl shadow-lg border border-primary/20 bg-white">
           <img 
             src="/gyma-icon.jpg" 
             alt="Gyma" 
