@@ -111,20 +111,41 @@ export const useWorkoutActions = ({
       } else {
         // Workout complete
         console.log("Workout complete!");
-        endWorkout();
-        
-        // We'll use the custom notification instead of this toast
-        // toast({
-        //   title: "Workout completed",
-        //   description: "Great job! You've completed your workout.",
-        // });
+        completeWorkout(); // Changed to call completeWorkout instead of endWorkout
       }
     }
   };
 
-  // Method to end workout without resetting the stopwatch
+  // New method specifically for workout completion
+  const completeWorkout = () => {
+    console.log("Completing workout - all exercises finished!");
+    
+    // Stop all potential timers
+    const setTimerKey = `set-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
+    const exerciseTimerKey = `exercise-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
+    
+    TimerManager.stopTimer(setTimerKey);
+    TimerManager.stopTimer(exerciseTimerKey);
+    
+    // Update state in sequence with small delays to prevent conflicts
+    setShowRestTimer(false);
+    
+    setTimeout(() => {
+      // Important: We don't reset the stopwatch time here
+      // We just mark the workout as not started
+      setIsWorkoutStarted(false);
+      setCurrentExerciseIndex(0);
+      setCurrentSet(0);
+      setTimerType('set');
+    }, 50);
+    
+    // The state will be persisted by the persistence hook
+    // No toast here - we'll show the trophy notification instead
+  };
+
+  // Method to end workout without resetting the stopwatch (used for pausing)
   const endWorkout = () => {
-    console.log("Ending workout, stopping all timers but preserving stopwatch time");
+    console.log("Ending workout (pausing), stopping all timers but preserving stopwatch time");
     
     // Stop all potential timers
     const setTimerKey = `set-${exercises[state.currentExerciseIndex]?.id || 'none'}-set-${state.currentSet}`;
@@ -172,6 +193,7 @@ export const useWorkoutActions = ({
     handleRestTimerComplete,
     resetWorkout,
     completeSet,
-    endWorkout
+    endWorkout,
+    completeWorkout // Export the new function
   };
 };

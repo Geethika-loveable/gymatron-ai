@@ -23,7 +23,7 @@ const WorkoutCompleteNotification: React.FC<WorkoutCompleteNotificationProps> = 
   const formattedTime = `${minutes}m ${seconds}s`;
   
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-30 px-4 animate-fade-in">
+    <div className="fixed bottom-4 left-0 right-0 z-50 px-4 animate-fade-in">
       <div className="relative mx-auto max-w-md overflow-hidden">
         <div className="relative rounded-lg border bg-card p-6 shadow-xl">
           {/* Background gradient overlay */}
@@ -40,25 +40,26 @@ const WorkoutCompleteNotification: React.FC<WorkoutCompleteNotificationProps> = 
           
           {/* Content */}
           <div className="relative flex flex-col items-center text-center">
-            <div className="mb-4 rounded-full bg-primary/10 p-3">
-              <Trophy className="h-8 w-8 text-primary" />
+            <div className="mb-4 rounded-full bg-primary/20 p-3">
+              <Trophy className="h-10 w-10 text-primary animate-pulse" />
             </div>
             
-            <h3 className="text-xl font-bold text-foreground mb-2">
+            <h3 className="text-2xl font-bold text-foreground mb-2">
               Workout Complete!
             </h3>
             
-            <p className="text-muted-foreground mb-3">
-              You crushed your workout in {formattedTime}
+            <p className="text-muted-foreground mb-4">
+              You crushed your workout in <span className="font-bold text-primary">{formattedTime}</span>
             </p>
             
-            <div className="w-full bg-muted h-1.5 rounded-full mb-4">
-              <div className="bg-primary h-1.5 rounded-full w-full" />
+            <div className="w-full bg-muted h-2 rounded-full mb-6">
+              <div className="bg-primary h-2 rounded-full w-full animate-pulse" />
             </div>
             
             <Button
               onClick={onClose}
               className="w-full"
+              size="lg"
             >
               Awesome! Done
             </Button>

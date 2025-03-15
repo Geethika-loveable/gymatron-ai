@@ -42,6 +42,7 @@ const Index = () => {
     startWorkout,
     handleRestTimerComplete,
     endWorkout,
+    completeWorkout, // Update to use the new method
     completeSet
   } = useWorkout(exercises);
 
@@ -95,14 +96,23 @@ const Index = () => {
     completeSet();
   }, [completeSet, currentExercise, currentSet, trackEvent]);
   
+  // Modified to use completeWorkout instead of endWorkout
   const handleEndWorkout = useCallback(() => {
     trackEvent('workout_ended', { 
       duration: stopwatchTime,
       exercise_count: exercises.length
     });
-    endWorkout();
+    completeWorkout(); // Changed from endWorkout to completeWorkout
     setShowWorkoutComplete(true);
-  }, [endWorkout, stopwatchTime, exercises.length, trackEvent]);
+  }, [completeWorkout, stopwatchTime, exercises.length, trackEvent]);
+  
+  const handlePauseWorkout = useCallback(() => {
+    trackEvent('workout_paused', { 
+      duration_so_far: stopwatchTime,
+      current_exercise: currentExercise ? currentExercise.name : null
+    });
+    endWorkout(); // Use endWorkout for pausing
+  }, [endWorkout, stopwatchTime, currentExercise, trackEvent]);
   
   const handleTimeUpdate = useCallback((time: number) => {
     if (Math.abs(stopwatchTime - time) > 50) {
@@ -170,7 +180,7 @@ const Index = () => {
               currentSet={currentSet}
               onRestTimerComplete={handleRestComplete}
               onCompleteSet={handleCompleteSet}
-              onEndWorkout={handleEndWorkout}
+              onEndWorkout={handleEndWorkout} // This now calls completeWorkout internally
               onOpenAuthModal={handleOpenAuthModal}
             />
           )}
