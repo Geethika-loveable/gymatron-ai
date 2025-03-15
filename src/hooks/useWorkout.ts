@@ -28,7 +28,7 @@ export const useWorkout = (exercises: Exercise[]) => {
     startWorkout,
     handleRestTimerComplete,
     endWorkout,
-    completeWorkout, // Add the new method
+    completeWorkout,
     completeSet
   } = useWorkoutActions({
     exercises: exercises.length > 0 ? exercises : savedExercises,
@@ -74,7 +74,7 @@ export const useWorkout = (exercises: Exercise[]) => {
     handleRestTimerComplete,
     resetWorkout,       // For complete reset including stopwatch
     endWorkout,         // For pausing workout
-    completeWorkout,    // New function for completing all exercises
+    completeWorkout,    // For when all exercises are completed
     completeSet
   };
 };

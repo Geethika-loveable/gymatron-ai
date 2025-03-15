@@ -42,7 +42,7 @@ const Index = () => {
     startWorkout,
     handleRestTimerComplete,
     endWorkout,
-    completeWorkout, // Update to use the new method
+    completeWorkout,
     completeSet
   } = useWorkout(exercises);
 
@@ -102,8 +102,8 @@ const Index = () => {
       duration: stopwatchTime,
       exercise_count: exercises.length
     });
-    completeWorkout(); // Changed from endWorkout to completeWorkout
-    setShowWorkoutComplete(true);
+    completeWorkout(); // Use completeWorkout to properly finish the workout
+    setShowWorkoutComplete(true); // Show the completion notification
   }, [completeWorkout, stopwatchTime, exercises.length, trackEvent]);
   
   const handlePauseWorkout = useCallback(() => {
@@ -136,9 +136,28 @@ const Index = () => {
     setShowWorkoutComplete(false);
   }, [trackEvent]);
 
+  // Listen for workout completion from the hook
   useEffect(() => {
-    console.log(`Index component rendered with stopwatch time: ${stopwatchTime}, isRestoringState: ${isRestoringState}`);
-  }, [stopwatchTime, isRestoringState]);
+    // Intentionally leave this empty, since we manually trigger the notification
+  }, [isWorkoutStarted]);
+
+  // Make sure the completion notification works when the workout is programmatically completed 
+  // from the useWorkoutActions hook when all exercises and sets are done
+  useEffect(() => {
+    const handleWorkoutCompletion = () => {
+      if (!isWorkoutStarted && stopwatchTime > 0 && !isRestoringState) {
+        setShowWorkoutComplete(true);
+      }
+    };
+
+    // We'll check if the workout just ended and should show completion
+    const checkForCompletion = () => {
+      // Delay the check slightly to ensure state is settled
+      setTimeout(handleWorkoutCompletion, 300);
+    };
+
+    checkForCompletion();
+  }, [isWorkoutStarted, isRestoringState, stopwatchTime]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

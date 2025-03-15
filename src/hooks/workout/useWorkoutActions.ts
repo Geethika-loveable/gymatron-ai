@@ -110,13 +110,13 @@ export const useWorkoutActions = ({
         }, 100);
       } else {
         // Workout complete
-        console.log("Workout complete!");
-        completeWorkout(); // Changed to call completeWorkout instead of endWorkout
+        console.log("Workout complete! All exercises and sets finished.");
+        completeWorkout(); // Call completeWorkout when all exercises are done
       }
     }
   };
 
-  // New method specifically for workout completion
+  // Dedicated method specifically for workout completion
   const completeWorkout = () => {
     console.log("Completing workout - all exercises finished!");
     
@@ -194,6 +194,6 @@ export const useWorkoutActions = ({
     resetWorkout,
     completeSet,
     endWorkout,
-    completeWorkout // Export the new function
+    completeWorkout // Make sure to export the completeWorkout function
   };
 };
