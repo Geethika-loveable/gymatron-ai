@@ -3,9 +3,14 @@
 // Run with: node scripts/generate-pwa-icons.js
 // Requires sharp: npm install --save-dev sharp
 
-const fs = require('fs');
-const path = require('path');
-const sharp = require('sharp');
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
+import { fileURLToPath } from 'url';
+
+// Get the directory name in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Source image path
 const sourceImage = path.join(__dirname, '../public/gyma-icon.jpg');
